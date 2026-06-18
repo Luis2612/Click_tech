@@ -110,21 +110,26 @@
           <div class="card bg-dark text-light border-secondary p-4 p-md-5 rounded-4 shadow-lg">
             <h3 class="fw-bold mb-4">Envíanos un Mensaje</h3>
             
-            <form id="contactForm" class="needs-validation" novalidate>
+            <form id="contactForm" class="needs-validation" action="https://formspree.io/f/xnjykdoy" method="POST" novalidate>
               <div class="row g-3">
                 <div class="col-md-6">
                   <label for="nombre" class="form-label small fw-semibold text-secondary">Nombre Completo</label>
-                  <input type="text" class="form-control bg-black text-light border-secondary py-2 text-light" id="nombre" required placeholder="Ej. Juan Pérez">
+                  <input type="text" name="nombre" class="form-control bg-black text-light border-secondary py-2 text-light" id="nombre" required placeholder="Ej. Juan Pérez">
                   <div class="invalid-feedback">Por favor ingresa tu nombre.</div>
                 </div>
                 <div class="col-md-6">
                   <label for="email" class="form-label small fw-semibold text-secondary">Correo Electrónico</label>
-                  <input type="email" class="form-control bg-black text-light border-secondary py-2 text-light" id="email" required placeholder="correo@ejemplo.com">
+                  <input type="email" name="email" class="form-control bg-black text-light border-secondary py-2 text-light" id="email" required placeholder="correo@ejemplo.com">
                   <div class="invalid-feedback">Por favor ingresa un correo válido.</div>
                 </div>
                 <div class="col-12">
+                  <label for="telefono" class="form-label small fw-semibold text-secondary">Tel&eacute;fono</label>
+                  <input type="number" name="telefono" class="form-control bg-black text-light border-secondary py-2 text-light" id="telefono" required placeholder="310xxxxxxx">
+                  <div class="invalid-feedback">Por favor ingresa tu telefono de contacto.</div>
+                </div>
+                <div class="col-12">
                   <label for="asunto" class="form-label small fw-semibold text-secondary">Asunto</label>
-                  <select class="form-select bg-black text-light border-secondary py-2 text-light" id="asunto" required>
+                  <select name="asunto" class="form-select bg-black text-light border-secondary py-2 text-light" id="asunto" required>
                     <option value="" disabled selected>Selecciona una opción</option>
                     <option value="ventas">Dudas sobre Productos / Ventas</option>
                     <option value="soporte">Soporte Técnico</option>
@@ -135,7 +140,7 @@
                 </div>
                 <div class="col-12">
                   <label for="mensaje" class="form-label small fw-semibold text-secondary">Mensaje</label>
-                  <textarea class="form-control bg-black text-light border-secondary py-2 text-light" id="mensaje" rows="5" required placeholder="Escribe tu mensaje aquí..."></textarea>
+                  <textarea name="mensaje" class="form-control bg-black text-light border-secondary py-2 text-light" id="mensaje" rows="5" required placeholder="Escribe tu mensaje aquí..."></textarea>
                   <div class="invalid-feedback">Por favor escribe tu mensaje.</div>
                 </div>
                 <div class="col-12 mt-4">
