@@ -44,3 +44,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+    document.getElementById('contactForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      if (this.checkValidity()) {
+        document.getElementById('formStatus').classList.remove('d-none');
+        //this.reset();
+        this.classList.remove('was-validated');
+        document.getElementById('contactForm').submit();
+        setTimeout(() => {
+          document.getElementById('formStatus').classList.add('d-none');
+        }, 5000);
+      } else {
+        event.stopPropagation();
+        this.classList.add('was-validated');
+      }
+    });
