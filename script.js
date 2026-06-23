@@ -49,8 +49,9 @@ document.addEventListener("DOMContentLoaded", () => {
       event.preventDefault();
       if (this.checkValidity()) {
         document.getElementById('formStatus').classList.remove('d-none');
-        this.reset();
+        //this.reset();
         this.classList.remove('was-validated');
+        document.getElementById('contactForm').submit();
         setTimeout(() => {
           document.getElementById('formStatus').classList.add('d-none');
         }, 5000);
