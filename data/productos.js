@@ -1,0 +1,92 @@
+const PRODUCTOS_INICIALES = [
+  {
+    id: 1,
+    nombre: "Teclado Mecánico RGB Pro",
+    descripcion: "Teclado mecánico con switches",
+    precio: 289900,
+    categoria: "Teclados",
+    stock: 25,
+    imagen: "https://clonesyperifericos.com/wp-content/uploads/2024/08/Teclado-Mecanico-Redragon-K616-RGB-FIZZ-PRO-USB-C-BT-Inalambrico-USB.png"
+  },
+  {
+    id: 2,
+    nombre: "Mouse Gaming Ultra 16K",
+    descripcion: "Mouse ergonómico con sensor óptico de 16000 DPI, 8 botones programables y peso ajustable.",
+    precio: 179900,
+    categoria: "Mouses",
+    stock: 40,
+    imagen: "https://http2.mlstatic.com/D_NQ_NP_951258-MLA45242768107_032021-O.webp"
+  },
+  {
+    id: 3,
+    nombre: "Monitor Curvo 27\" 165Hz",
+    descripcion: "Monitor gaming curvo QHD 2560x1440, panel VA, 1ms de respuesta y compatible con FreeSync.",
+    precio: 1149900,
+    categoria: "Monitores",
+    stock: 12,
+    imagen: "https://media.falabella.com/falabellaCL/146599982_01/w=1500,h=1500,fit=cover"
+  },
+  {
+    id: 4,
+    nombre: "Audífonos Inalámbricos ANC",
+    descripcion: "Audífonos over-ear con cancelación activa de ruido, 30h de batería y micrófono integrado.",
+    precio: 349900,
+    categoria: "Audio",
+    stock: 18,
+    imagen: "https://m.media-amazon.com/images/I/614XfrOiMRL._AC_UF894,1000_QL80_.jpg"
+  },
+  {
+    id: 5,
+    nombre: "Webcam 4K AutoFocus",
+    descripcion: "Cámara web 4K con enfoque automático, corrección de luz y micrófono dual estéreo.",
+    precio: 259900,
+    categoria: "Accesorios",
+    stock: 30,
+    imagen: "https://http2.mlstatic.com/D_Q_NP_2X_865030-MCO82363355023_022025-P.webp"
+  },
+  {
+    id: 6,
+    nombre: "SSD NVMe 1TB Gen4",
+    descripcion: "Unidad de estado sólido NVMe PCIe Gen4, velocidad de lectura hasta 7000 MB/s y escritura 5500 MB/s.",
+    precio: 419900,
+    categoria: "Almacenamiento",
+    stock: 35,
+    imagen: "https://static.gigabyte.com/StaticFile/Image/Global/9536d4134d6844ded6c48f1e7b0ed553/Product/25699"
+  },
+  {
+    id: 7,
+    nombre: "Mousepad XL RGB",
+    descripcion: "Alfombrilla de escritorio extendida 900x400mm con iluminación RGB perimetral y base antideslizante.",
+    precio: 129900,
+    categoria: "Accesorios",
+    stock: 50,
+    imagen: "https://luegopagocdn.azureedge.net/content-process/products-images/prod/2478/c205f814-59f3-45da-8f8f-28dc8dbaae45.webp"
+  },
+  {
+    id: 8,
+    nombre: "Micrófono Condensador USB",
+    descripcion: "Micrófono cardioide de condensador con conexión USB-C, filtro anti-pop incluido y soporte ajustable.",
+    precio: 299900,
+    categoria: "Audio",
+    stock: 22,
+    imagen: "https://exitocol.vtexassets.com/arquivos/ids/30872990/microfono-condensador-rgb-cardioide-usb-para-pc-gamer-accesorios-computacion.jpg?v=638934139798470000"
+  },
+  {
+    id: 9,
+    nombre: "Hub USB-C 7 en 1",
+    descripcion: "Hub multipuerto con HDMI 4K, 3x USB 3.0, lector SD/MicroSD y carga PD 100W.",
+    precio: 159900,
+    categoria: "Accesorios",
+    stock: 45,
+    imagen: "https://tecnoimportaciones.com/wp-content/uploads/2024/11/Untitled-Project-3-11.jpg"
+  },
+  {
+    id: 10,
+    nombre: "Router WiFi 6 Mesh",
+    descripcion: "Sistema mesh WiFi 6 de triple banda, cobertura hasta 500m², velocidad combinada de 5400 Mbps.",
+    precio: 689900,
+    categoria: "Redes",
+    stock: 8,
+    imagen: "https://media.falabella.com/sodimacCO/754042/public"
+  }
+];
