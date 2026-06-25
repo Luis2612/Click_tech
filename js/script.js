@@ -45,7 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-    document.getElementById('contactForm').addEventListener('submit', function(event) {
+if(document.getElementById('contactForm') != undefined){
+  document.getElementById('contactForm').addEventListener('submit', function(event) {
       event.preventDefault();
       if (this.checkValidity()) {
         document.getElementById('formStatus').classList.remove('d-none');
@@ -60,3 +61,6 @@ document.addEventListener("DOMContentLoaded", () => {
         this.classList.add('was-validated');
       }
     });
+}
+
+    

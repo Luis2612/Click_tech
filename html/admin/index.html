@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Admin | Click Techs</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/styles.css">
+  <link rel="stylesheet" href="../../css/admin.css">
+  <link rel="icon" type="image/x-icon" href="../../img/icon/icono.ico">
+</head>
+<body class="bg-dark text-light">
+
+  <div class="container-fluid">
+    <div class="row">
+      <nav class="col-lg-2 sidebar py-4 px-3">
+        <div class="d-flex align-items-center mb-4 px-2">
+          <img src="../../img/icono.png" alt="Click Techs" class="nav_icon me-2">
+          <span class="fw-bold">Click Techs</span>
+        </div>
+        <hr class="border-secondary">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link active" href="#">
+              <i class="bi bi-grid-1x2 me-2"></i>Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" onclick="abrirAgregar()">
+              <i class="bi bi-plus-square me-2"></i>Agregar Producto
+            </a>
+          </li>
+
+        </ul>
+        <hr class="border-secondary">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="../home/index.html">
+              <i class="bi bi-house me-2"></i>Ir al Sitio
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <main class="col-lg-10 py-4 px-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+          <div>
+            <h1 class="h3 fw-bold mb-1">Panel de Administración</h1>
+            <p class="text-secondary mb-0">Gestión de productos del catálogo</p>
+          </div>
+          <button class="btn btn-primary rounded-pill px-4" onclick="abrirAgregar()">
+            <i class="bi bi-plus-lg me-2"></i>Nuevo Producto
+          </button>
+        </div>
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6 col-xl-3">
+            <div class="stat-card p-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <p class="text-secondary small mb-1 text-uppercase">Total Productos</p>
+                  <h3 class="fw-bold mb-0" id="contadorProductos">0</h3>
+                </div>
+                <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-3">
+                  <i class="bi bi-box-seam fs-4"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="stat-card p-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <p class="text-secondary small mb-1 text-uppercase">Categorías</p>
+                  <h3 class="fw-bold mb-0" id="contadorCategorias">0</h3>
+                </div>
+                <div class="bg-info bg-opacity-10 text-info rounded-3 p-3">
+                  <i class="bi bi-tags fs-4"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="stat-card p-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <p class="text-secondary small mb-1 text-uppercase">Stock Total</p>
+                  <h3 class="fw-bold mb-0" id="contadorStock">0</h3>
+                </div>
+                <div class="bg-success bg-opacity-10 text-success rounded-3 p-3">
+                  <i class="bi bi-archive fs-4"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="stat-card p-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <p class="text-secondary small mb-1 text-uppercase">Stock Bajo</p>
+                  <h3 class="fw-bold mb-0" id="contadorStockBajo">0</h3>
+                </div>
+                <div class="bg-warning bg-opacity-10 text-warning rounded-3 p-3">
+                  <i class="bi bi-exclamation-triangle fs-4"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card bg-transparent border border-secondary rounded-3 mb-4">
+          <div class="card-body py-2">
+            <div class="input-group">
+              <span class="input-group-text bg-transparent border-0 text-secondary">
+                <i class="bi bi-search"></i>
+              </span>
+              <input type="text" id="inputBuscar" class="form-control bg-transparent border-0 text-light shadow-none"
+                     placeholder="Buscar por nombre, categoría o descripción...">
+            </div>
+          </div>
+        </div>
+        <div class="card bg-transparent border border-secondary rounded-3">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-dark-custom text-light mb-0 align-middle">
+                <thead>
+                  <tr>
+                    <th style="width: 60px;">Img</th>
+                    <th>Producto</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th style="width: 100px;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaProductos">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <div class="modal fade" id="modalProducto" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content rounded-4">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title fw-bold" id="modalTitulo">Agregar Producto</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formProducto" class="needs-validation" novalidate>
+            <div class="row g-3">
+              <div class="col-md-8">
+                <label for="inputNombre" class="form-label small fw-semibold text-secondary">Nombre del Producto</label>
+                <input type="text" class="form-control bg-black text-light border-secondary" id="inputNombre"
+                       placeholder="Ej. Teclado Mecánico RGB" required>
+                <div class="invalid-feedback">El nombre es obligatorio.</div>
+              </div>
+              <div class="col-md-4">
+                <label for="inputCategoria" class="form-label small fw-semibold text-secondary">Categoría</label>
+                <select class="form-select bg-black text-light border-secondary" id="inputCategoria" required>
+                  <option value="" disabled selected>Seleccionar...</option>
+                  <option value="Teclados">Teclados</option>
+                  <option value="Mouses">Mouses</option>
+                  <option value="Monitores">Monitores</option>
+                  <option value="Audio">Audio</option>
+                  <option value="Accesorios">Accesorios</option>
+                  <option value="Componentes">Componentes</option>
+                  <option value="Almacenamiento">Almacenamiento</option>
+                  <option value="Redes">Redes</option>
+                </select>
+                <div class="invalid-feedback">Selecciona una categoría.</div>
+              </div>
+              <div class="col-12">
+                <label for="inputDescripcion" class="form-label small fw-semibold text-secondary">Descripción</label>
+                <textarea class="form-control bg-black text-light border-secondary" id="inputDescripcion" rows="3"
+                          placeholder="Describe el producto..." required></textarea>
+                <div class="invalid-feedback">La descripción es obligatoria.</div>
+              </div>
+              <div class="col-md-4">
+                <label for="inputPrecio" class="form-label small fw-semibold text-secondary">Precio (COP)</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-black text-secondary border-secondary">$</span>
+                  <input type="number" class="form-control bg-black text-light border-secondary" id="inputPrecio"
+                         placeholder="289900" min="0" required>
+                </div>
+                <div class="invalid-feedback">Ingresa un precio válido.</div>
+              </div>
+              <div class="col-md-4">
+                <label for="inputStock" class="form-label small fw-semibold text-secondary">Stock</label>
+                <input type="number" class="form-control bg-black text-light border-secondary" id="inputStock"
+                       placeholder="25" min="0" required>
+                <div class="invalid-feedback">Ingresa el stock.</div>
+              </div>
+              <div class="col-md-4">
+                <label for="inputImagen" class="form-label small fw-semibold text-secondary">Imagen del Producto</label>
+                <input type="file" class="form-control bg-black text-light border-secondary" id="inputImagen"
+                       accept="image/*" onchange="previsualizarImagen(event)">
+                <small class="text-secondary">Máx. 2MB (JPG, PNG, WebP)</small>
+                <div id="previewContainer" class="mt-2 d-none position-relative d-inline-block">
+                  <img id="previewImagen" src="" alt="Preview" class="rounded border border-secondary" 
+                       style="width: 80px; height: 80px; object-fit: cover;">
+                  <button type="button" class="btn btn-sm btn-danger position-absolute top-0 start-100 translate-middle rounded-circle p-0"
+                          style="width: 22px; height: 22px; font-size: 10px;" onclick="quitarImagen()">
+                    <i class="bi bi-x"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary rounded-pill px-4" id="btnGuardar" onclick="guardarDesdeFormulario()">
+            <i class="bi bi-plus-circle me-2"></i>Agregar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="modalEliminar" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content rounded-4 text-center">
+        <div class="modal-body py-4">
+          <i class="bi bi-exclamation-triangle text-danger display-3 mb-3 d-block"></i>
+          <h5 class="fw-bold mb-2">¿Eliminar producto?</h5>
+          <p class="text-secondary mb-0">Se eliminará <strong class="text-light" id="nombreProductoEliminar"></strong> de forma permanente.</p>
+        </div>
+        <div class="modal-footer border-secondary justify-content-center">
+          <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger rounded-pill px-4" onclick="ejecutarEliminar()">
+            <i class="bi bi-trash3 me-2"></i>Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContenedor"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../../data/productos.js"></script>
+  <script src="../../js/admin.js"></script>
+  <script src="../../js/modal.js"></script>
+</body>
+</html>
