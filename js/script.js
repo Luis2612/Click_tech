@@ -63,4 +63,19 @@ if(document.getElementById('contactForm') != undefined){
     });
 }
 
+if(document.getElementById('authenticationtForm') != undefined){
+  document.getElementById('authenticationtForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const USUARIO = 'admin';
+      const PASSWORD = 'admin';
+
+      if(document.getElementById('usuario').value===USUARIO && document.getElementById('password').value===PASSWORD){
+        window.location.href = "/html/admin/index.html";
+      }else{
+        //this.classList.add('was-validated');
+        document.getElementById('formStatus').classList.remove('d-none');
+      }
+    });
+}
+
     
