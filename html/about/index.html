@@ -13,48 +13,49 @@
   <link rel="stylesheet" href="../../css/styles.css">
   <link rel="icon" type="image/x-icon" href="../../img/icon/icono.ico">
 </head>
-<body class="">
+<body class="d-flex flex-column min-vh-100">
 
-  <nav class="navbar navbar-expand-lg navbar-dark bg-black border-bottom border-secondary sticky-top">
+  <nav class="navbar navbar-custom navbar-expand-lg border-bottom border-secondary sticky-top">
     <div class="container">
-      <a class="navbar-brand fw-bold" href="index.html">
+      <a class="navbar-brand fw-bold text-color-principal" href="index.html">
         <img src="../../img/icono.png" alt="icono_sin_fondo" class="nav_icon">Click Techs
       </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
+      <button class="navbar-toggler bg-resaltar text-color-secundario" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="bi bi-list text-white fs-1"></i>
+        <!-- <span class="navbar-toggler-icon"></span> -->
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link" href="../home/index.html">Inicio</a>
+            <a class="nav-link fw-bold " href="../home/index.html">Inicio</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="index.html#productos">Productos</a>
+            <a class="nav-link fw-bold " href="index.html#productos">Productos</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="../about/index.html">Nosotros</a>
+            <a class="nav-link fw-bold  active" aria-current="page" href="../about/index.html">Nosotros</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="../contact/index.html">Contacto</a>
+            <a class="nav-link fw-bold " href="../contact/index.html">Contacto</a>
           </li>
         </ul>
         <div class="d-flex ms-lg-3">
-          <a href="index.html#productos" class="btn btn-primary rounded-pill px-4">Ver Tienda</a>
+          <a href="index.html#productos" class="btn bg-resaltar fw-bold rounded-pill px-4">Ver Tienda</a>
         </div>
       </div>
     </div>
   </nav>
-  <section class="py-5 bg-gradient">
+  <section class="py-5 bg-secundario bg-gradient">
     <div class="container my-5">
       <div class="row align-items-center g-5">
         <div class="col-lg-6">
-          <span class="badge bg-primary px-3 py-2 mb-3">Sobre Nosotros</span>
+          <span class="badge bg-resaltar px-3 py-2 mb-3">Sobre Nosotros</span>
           <h1 class="display-4 fw-bold mb-4">La Evolución Digital en tus Manos</h1>
-          <p class="lead text-secondary">En Click Techs, creemos que la tecnología no es solo una herramienta, sino una forma de impulsar tu potencial al máximo.</p>
-          <p class="text-secondary">Nos dedicamos a curar y ofrecer los mejores gadgets, periféricos y hardware de alto rendimiento para que cada clic cuente.</p>
+          <p class="lead text-color-alternativo">En Click Techs, creemos que la tecnología no es solo una herramienta, sino una forma de impulsar tu potencial al máximo.</p>
+          <p class="text-color-alternativo">Nos dedicamos a curar y ofrecer los mejores gadgets, periféricos y hardware de alto rendimiento para que cada clic cuente.</p>
           <div class="d-flex gap-3 mt-4">
-            <a href="#equipo" class="btn btn-primary btn-lg">Nuestro Equipo</a>
-            <a href="#historia" class="btn btn-outline-light btn-lg">Nuestra Historia</a>
+            <a href="#equipo" class="btn bg-resaltar btn-lg fw-semibold">Nuestro Equipo</a>
+            <a href="#historia" class="btn btn-outline-light btn-lg fw-semibold">Nuestra Historia</a>
           </div>
         </div>
         <div class="col-lg-6">
@@ -68,19 +69,19 @@
       <div class="row g-4 text-center">
         <div class="col-6 col-md-3">
           <h2 class="fw-bold display-5">5K+</h2>
-          <p class="text-secondary text-uppercase mb-0">Clientes Felices</p>
+          <p class="text-color-resaltar fw-semibold text-uppercase mb-0">Clientes Felices</p>
         </div>
         <div class="col-6 col-md-3">
           <h2 class="fw-bold display-5">10K+</h2>
-          <p class="text-secondary text-uppercase mb-0">Envíos Exitosos</p>
+          <p class="text-color-resaltar fw-semibold text-uppercase mb-0">Envíos Exitosos</p>
         </div>
         <div class="col-6 col-md-3">
           <h2 class="fw-bold display-5">24/7</h2>
-          <p class="text-secondary text-uppercase mb-0">Soporte Técnico</p>
+          <p class="text-color-resaltar fw-semibold text-uppercase mb-0">Soporte Técnico</p>
         </div>
         <div class="col-6 col-md-3">
           <h2 class="fw-bold display-5">99%</h2>
-          <p class="text-secondary text-uppercase mb-0">Satisfacción</p>
+          <p class="text-color-resaltar fw-semibold text-uppercase mb-0">Satisfacción</p>
         </div>
       </div>
     </div>
@@ -90,30 +91,30 @@
       <div class="row g-5 align-items-center">
         <div class="col-lg-6">
           <h2 class="display-5 fw-bold mb-4">Nuestra Filosofía</h2>
-          <p class="text-secondary">Click Techs nació con el propósito de simplificar la búsqueda de gadgets y periféricos de alto nivel. Analizamos, testeamos y seleccionamos cada uno de los productos de nuestro catálogo para asegurar que cumplan con los estándares que un verdadero entusiasta de la tecnología merece.</p>
-          <p class="text-secondary">Queremos ser tu aliado tecnológico número uno, trayéndote las innovaciones más recientes directamente a tu puerta.</p>
+          <p class="text-color-alternativo fs-5">Click Techs nació con el propósito de simplificar la búsqueda de gadgets y periféricos de alto nivel. Analizamos, testeamos y seleccionamos cada uno de los productos de nuestro catálogo para asegurar que cumplan con los estándares que un verdadero entusiasta de la tecnología merece.</p>
+          <p class="text-color-alternativo fs-5">Queremos ser tu aliado tecnológico número uno, trayéndote las innovaciones más recientes directamente a tu puerta.</p>
         </div>
         <div class="col-lg-6">
           <div class="row g-4">
             <div class="col-12">
-              <div class="card bg-dark text-light border-secondary p-4">
+              <div class="card bg-secondary bg-opacity-25 text-light border-secondary p-4">
                 <div class="card-body">
                   <div class="d-flex align-items-center mb-3">
-                    <i class="bi bi-rocket-takeoff text-primary fs-3 me-3"></i>
+                    <i class="bi bi-rocket-takeoff text-color-resaltar fs-3 me-3"></i>
                     <h3 class="card-title h5 mb-0">Misión</h3>
                   </div>
-                  <p class="card-text text-secondary">Hacer accesible la tecnología más avanzada y de alto rendimiento a todos los creadores, entusiastas y profesionales del entorno digital, garantizando calidad excepcional.</p>
+                  <p class="card-text text-color-alternativo fs-5">Hacer accesible la tecnología más avanzada y de alto rendimiento a todos los creadores, entusiastas y profesionales del entorno digital, garantizando calidad excepcional.</p>
                 </div>
               </div>
             </div>
             <div class="col-12">
-              <div class="card bg-dark text-light border-secondary p-4">
+              <div class="card bg-secondary bg-opacity-25 text-light border-secondary p-4">
                 <div class="card-body">
                   <div class="d-flex align-items-center mb-3">
-                    <i class="bi bi-eye text-primary fs-3 me-3"></i>
+                    <i class="bi bi-eye text-color-resaltar fs-3 me-3"></i>
                     <h3 class="card-title h5 mb-0">Visión</h3>
                   </div>
-                  <p class="card-text text-secondary">Ser la tienda de e-commerce tecnológica líder en innovación, reconocida por nuestra curaduría de productos premium y un excelente servicio al cliente.</p>
+                  <p class="card-text text-color-alternativo fs-5">Ser la tienda de e-commerce tecnológica líder en innovación, reconocida por nuestra curaduría de productos premium y un excelente servicio al cliente.</p>
                 </div>
               </div>
             </div>
@@ -131,7 +132,7 @@
 
       <div class="row g-4 justify-content-center">
         <div class="col-md-4">
-          <div class="card bg-dark text-light border-secondary h-100 text-center">
+          <div class="card bg-secondary bg-opacity-25 text-light border-secondary h-100 text-center">
             <img src="../../img/brim.webp" alt="Luis Guillermo Imbachi" class="card-img-top img-fluid" style="height: 300px; object-fit: cover;">
             <div class="card-body">
               <h3 class="card-title h5 fw-bold">Luis Guillermo Imbachi</h3>
@@ -147,7 +148,7 @@
           </div>
         </div>
         <div class="col-md-4">
-          <div class="card bg-dark text-light border-secondary h-100 text-center">
+          <div class="card bg-secondary bg-opacity-25 text-light border-secondary h-100 text-center">
             <img src="../../img/lina-gallardo-img.png" alt="Lina Gallardo Desarrolladora" class="card-img-top img-fluid" style="height: 300px; object-fit: cover;">
             <div class="card-body">
               <h3 class="card-title h5 fw-bold">Lina Gallardo Corrales</h3>
@@ -164,7 +165,7 @@
         </div>
         <div class="col-md-4 justify-content-center">
             <div
-              class="card bg-dark text-light border-secondary h-100 text-center"
+              class="card bg-secondary bg-opacity-25 text-light border-secondary h-100 text-center"
             >
               <img
                 src="../../img/julinene.jpg"
@@ -211,7 +212,7 @@
             </div>
           </div>
         <div class="col-md-4">
-          <div class="card bg-dark text-light border-secondary h-100 text-center">
+          <div class="card bg-secondary bg-opacity-25 text-light border-secondary h-100 text-center">
             <img src="../../img/diego-fonseca.jpg" alt="Diego Ivan Fonseca Conde" class="card-img-top img-fluid" style="height: 300px; object-fit: cover;">
             <div class="card-body">
               <h3 class="card-title h5 fw-bold">Diego Ivan Fonseca Conde</h3>
@@ -228,7 +229,7 @@
           </div>
         </div>
         <div class="col-md-4">
-          <div class="card bg-dark text-light border-secondary h-100 text-center">
+          <div class="card bg-secondary bg-opacity-25 text-light border-secondary h-100 text-center">
             <img src="../../img/ManuelFr.jpeg" alt="Manuel Caballero Escobar" class="card-img-top img-fluid" style="height: 300px; object-fit: cover;">
             <div class="card-body">
               <h3 class="card-title h5 fw-bold">Manuel F. Caballero Escobar</h3>
@@ -307,11 +308,11 @@
       </div>
     </div>
   </section>
-  <footer class="bg-black text-secondary py-5 border-top border-secondary">
+  <footer class="footer footer-custom text-secondary py-5 border-top border-secondary mt-auto">
     <div class="container">
       <div class="row g-4 mb-4">
         <div class="col-md-6">
-          <h5 class="text-light fw-bold"><i class="bi bi-cpu me-2"></i>Click Techs</h5>
+          <h5 class="text-light fw-bold text-color-principal"><i class="bi bi-cpu me-2"></i>Click Techs</h5>
           <p class="small text-secondary">Tu destino definitivo para periféricos y gadgets de alto rendimiento. Diseñado para potenciar tu vida digital.</p>
         </div>
         <div class="col-md-3">
