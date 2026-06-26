@@ -46,7 +46,7 @@
   <section class="py-5 bg-gradient">
     <div class="container my-5">
       <div class="text-center max-w-2xl mx-auto mb-5">
-        <span class="badge bg-primary px-3 py-2 mb-3">Contacto</span>
+        <span class="badge bg-resaltar px-3 py-2 mb-3">Contacto</span>
         <h1 class="display-4 fw-bold mb-4">Estamos a un Clic de Distancia</h1>
         <p class="lead text-secondary">¿Tienes dudas sobre algún producto, necesitas soporte técnico o quieres realizar
           una cotización especial? Escríbenos y nuestro equipo te responderá lo antes posible.</p>
@@ -62,7 +62,7 @@
             directamente en nuestras oficinas.</p>
 
           <div class="d-flex align-items-start mb-4">
-            <div class="bg-primary bg-opacity-25 text-primary rounded-3 p-3 me-3">
+            <div class="bg-info bg-opacity-25 text-color-principal rounded-3 p-3 me-3">
               <i class="bi bi-envelope fs-4"></i>
             </div>
             <div>
@@ -73,7 +73,7 @@
           </div>
 
           <div class="d-flex align-items-start mb-4">
-            <div class="bg-primary bg-opacity-25 text-primary rounded-3 p-3 me-3">
+            <div class="bg-info bg-opacity-25 text-color-principal rounded-3 p-3 me-3">
               <i class="bi bi-telephone fs-4"></i>
             </div>
             <div>
@@ -84,7 +84,7 @@
           </div>
 
           <div class="d-flex align-items-start mb-4">
-            <div class="bg-primary bg-opacity-25 text-primary rounded-3 p-3 me-3">
+            <div class="bg-info bg-opacity-25 text-color-principal rounded-3 p-3 me-3">
               <i class="bi bi-geo-alt fs-4"></i>
             </div>
             <div>
@@ -95,7 +95,7 @@
           </div>
 
           <div class="d-flex align-items-start mb-5">
-            <div class="bg-primary bg-opacity-25 text-primary rounded-3 p-3 me-3">
+            <div class="bg-info bg-opacity-25 text-light rounded-3 p-3 me-3">
               <i class="bi bi-clock fs-4"></i>
             </div>
             <div>
@@ -115,36 +115,36 @@
           </div>
         </div>
         <div class="col-lg-7">
-          <div class="card bg-dark text-light border-secondary p-4 p-md-5 rounded-4 shadow-lg">
+          <div class="card bg-secondary bg-opacity-25 text-light border-secondary p-4 p-md-5 rounded-4 shadow-lg">
             <h3 class="fw-bold mb-4">Envíanos un Mensaje</h3>
 
             <form id="contactForm" class="needs-validation" action="https://formspree.io/f/xnjykdoy" method="POST"
               novalidate>
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label for="nombre" class="form-label small fw-semibold text-secondary">Nombre Completo</label>
+                  <label for="nombre" class="form-label small fw-semibold text-color-alternativo">Nombre Completo</label>
                   <input type="text" name="nombre"
-                    class="form-control bg-black text-light border-secondary py-2 text-light" id="nombre" required
+                    class="form-control bg-secundario text-light border-secondary py-2 text-light" id="nombre" required
                     placeholder="Ej. Juan Pérez">
                   <div class="invalid-feedback">Por favor ingresa tu nombre.</div>
                 </div>
                 <div class="col-md-6">
-                  <label for="email" class="form-label small fw-semibold text-secondary">Correo Electrónico</label>
+                  <label for="email" class="form-label small fw-semibold text-color-alternativo">Correo Electrónico</label>
                   <input type="email" name="email"
-                    class="form-control bg-black text-light border-secondary py-2 text-light" id="email" required
+                    class="form-control bg-secundario text-light border-secondary py-2 text-light" id="email" required
                     placeholder="correo@ejemplo.com">
                   <div class="invalid-feedback">Por favor ingresa un correo válido.</div>
                 </div>
                 <div class="col-12">
-                  <label for="telefono" class="form-label small fw-semibold text-secondary">Tel&eacute;fono</label>
+                  <label for="telefono" class="form-label small fw-semibold text-color-alternativo">Tel&eacute;fono</label>
                   <input type="number" name="telefono"
-                    class="form-control bg-black text-light border-secondary py-2 text-light" id="telefono" required
+                    class="form-control bg-secundario text-light border-secondary py-2 text-light" id="telefono" required
                     placeholder="310xxxxxxx">
                   <div class="invalid-feedback">Por favor ingresa tu telefono de contacto.</div>
                 </div>
                 <div class="col-12">
-                  <label for="asunto" class="form-label small fw-semibold text-secondary">Asunto</label>
-                  <select name="asunto" class="form-select bg-black text-light border-secondary py-2 text-light"
+                  <label for="asunto" class="form-label small fw-semibold text-color-alternativo">Asunto</label>
+                  <select name="asunto" class="form-select bg-secundario text-light border-secondary py-2 text-light"
                     id="asunto" required>
                     <option value="" disabled selected>Selecciona una opción</option>
                     <option value="ventas">Dudas sobre Productos / Ventas</option>
@@ -155,13 +155,13 @@
                   <div class="invalid-feedback">Por favor selecciona un asunto.</div>
                 </div>
                 <div class="col-12">
-                  <label for="mensaje" class="form-label small fw-semibold text-secondary">Mensaje</label>
-                  <textarea name="mensaje" class="form-control bg-black text-light border-secondary py-2 text-light"
+                  <label for="mensaje" class="form-label small fw-semibold text-color-alternativo">Mensaje</label>
+                  <textarea name="mensaje" class="form-control bg-secundario text-light border-secondary py-2 text-light"
                     id="mensaje" rows="5" required placeholder="Escribe tu mensaje aquí..."></textarea>
                   <div class="invalid-feedback">Por favor escribe tu mensaje.</div>
                 </div>
                 <div class="col-12 mt-4">
-                  <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill py-2 fw-semibold">
+                  <button type="submit" class="btn btn-info btn-lg w-100 rounded-pill py-2 fw-semibold">
                     <i class="bi bi-send me-2"></i>Enviar Mensaje
                   </button>
                 </div>
