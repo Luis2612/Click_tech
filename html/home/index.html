@@ -9,32 +9,33 @@
   <link rel="stylesheet" href="../../css/styles.css">
   <link rel="icon" type="image/x-icon" href="../../img/icon/icono.ico">
 </head>
-<body class="bg-dark text-light">
-  <nav class="navbar navbar-expand-lg navbar-dark bg-black border-bottom border-secondary sticky-top">
+<body class="d-flex flex-column min-vh-100">
+  <nav class="navbar navbar-custom navbar-expand-lg border-bottom border-secondary sticky-top">
     <div class="container">
-      <a class="navbar-brand fw-bold" href="index.html">
+      <a class="navbar-brand fw-bold text-color-principal" href="../home/index.html">
         <img src="../../img/icono.png" alt="icono_sin_fondo" class="nav_icon">Click Techs
       </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
+      <button class="navbar-toggler bg-resaltar text-color-secundario" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="bi bi-list text-white fs-1"></i>
+        <!-- <span class="navbar-toggler-icon"></span> -->
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="../home/index.html">Inicio</a>
+            <a class="nav-link fw-bold  active" aria-current="page" href="../home/index.html">Inicio</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#productos">Productos</a>
+            <a class="nav-link fw-bold " href="#productos">Productos</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="../about/index.html">Nosotros</a>
+            <a class="nav-link fw-bold " href="../about/index.html">Nosotros</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="../contact/index.html">Contacto</a>
+            <a class="nav-link fw-bold " href="../contact/index.html">Contacto</a>
           </li>
         </ul>
         <div class="d-flex ms-lg-3">
-          <a href="#productos" class="btn btn-primary rounded-pill px-4">Ver Tienda</a>
+          <a href="#productos" class="btn bg-resaltar fw-bold rounded-pill px-4">Ver Tienda</a>
         </div>
       </div>
     </div>
@@ -44,10 +45,10 @@
   <main class="py-5">
     <div class="container my-5 text-center">
       <div class="py-5 border border-secondary border-dashed rounded-4">
-        <i class="bi bi-shop display-1 text-secondary mb-3"></i>
+        <i class="bi bi-shop display-1 text-color-resaltar mb-3"></i>
         <h1 class="fw-bold">Bienvenido a Click Techs</h1>
         <p class="lead text-secondary max-w-md mx-auto">Tu destino definitivo para periféricos y gadgets de alto rendimiento.</p>
-        <a href="#productos" class="btn btn-outline-light rounded-pill px-4 mt-3">Explorar catálogo</a>
+        <a href="#productos" class="btn btn-outline-info rounded-pill px-4 mt-3">Explorar catálogo</a>
       </div>
     </div>
 
@@ -70,8 +71,7 @@
       </div>
     </section>
   </main>
-
-  <footer class="bg-black text-secondary py-5 border-top border-secondary">
+  <footer class="footer footer-custom text-secondary py-5 border-top border-secondary mt-auto">
     <div class="container">
       <div class="row g-4 mb-4">
         <div class="col-md-6">
@@ -85,7 +85,7 @@
             <li><a href="#productos" class="text-secondary text-decoration-none">Productos</a></li>
             <li><a href="../about/index.html" class="text-secondary text-decoration-none">Nosotros</a></li>
             <li><a href="../contact/index.html" class="text-secondary text-decoration-none">Contacto</a></li>
-            <li><a href="../admin/singin.html" class="text-secondary text-decoration-none">admin</a></li>
+            <li><a href="../admin/singin.html" class="text-secondary text-decoration-none">Admin</a></li>
           </ul>
         </div>
         <div class="col-md-3">

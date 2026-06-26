@@ -62,11 +62,11 @@ function listarProductos(filtro = "") {
         }
       </td>
       <td>
-        <div class="fw-semibold">${p.nombre}</div>
-        <small class="text-secondary">${p.descripcion.length > 60 ? p.descripcion.substring(0, 60) + "..." : p.descripcion}</small>
+        <div class="fw-semibold text-color-principal">${p.nombre}</div>
+        <small class="text-color-alternativo">${p.descripcion.length > 60 ? p.descripcion.substring(0, 60) + "..." : p.descripcion}</small>
       </td>
       <td><span class="badge bg-primary bg-opacity-25 text-primary">${p.categoria}</span></td>
-      <td class="fw-semibold">$${p.precio.toLocaleString("es-CO")}</td>
+      <td class="fw-semibold text-color-principal">$${p.precio.toLocaleString("es-CO")}</td>
       <td>
         <span class="badge ${p.stock > 10 ? 'bg-success' : p.stock > 0 ? 'bg-warning text-dark' : 'bg-danger'} bg-opacity-25 
         ${p.stock > 10 ? 'text-success' : p.stock > 0 ? 'text-warning' : 'text-danger'}">

@@ -1,22 +1,91 @@
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body{
+    background: #0F172A !important;
+    color: #F8FAFC !important;
+}
+
 .nav_icon {
     max-width: 40px;
     margin-right: 5px;
 }
 
+.navbar-custom, .footer-custom{
+    background: #1E293B !important;
+    border-right: 1px solid #2d2d2d !important;
+}
+.navbar-custom .nav-link{
+    color: #94A3B8;
+    margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    transition: all 0.2s ease;
+}
+
+.navbar-custom .nav-link:hover,
+.navbar-custom .nav-link.active{
+    color: #F8FAFC;
+    background: rgba(13, 110, 253, 0.15);
+}
+
+.navbar-custom .nav-link.active{
+    color: #06B6D4;
+}
+
+/* //Color de texto resaltado */
+
+.text-color-resaltar{
+    color: #06b6d4 !important;
+}
+.text-color-alternativo{
+    color: #94a3b8 !important;
+}
+.text-color-principal{
+    color: #f8fafc !important;
+}
+.text-color-secundario{
+    color: #1E293B !important;
+}
+/* Cambiar el color de fondo del input buscar */
+input[type="text"]::placeholder,
+input[type="number"]::placeholder,
+textarea::placeholder{
+    color: #94A3B8 !important;
+    opacity: 0.6 !important;
+}
+
+/*cambiar color de fondo inputs*/
+
+.bg-secundario{
+    background-color: #0F172A !important;
+}
+.bg-secundario-suave{
+    background-color: #1E293B !important;
+}
+.bg-resaltar{
+    background-color: #06B6D4 !important;
+}
+
+/* Tarjetas de producto - Tienda */
+
 .card-producto {
-    background: #141414;
+    background: #1E293B;
     border: 1px solid #2d2d2d;
     transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card-producto:hover {
     transform: translateY(-6px);
-    border-color: #3d8bfd;
-    box-shadow: 0 8px 25px rgba(13, 110, 253, 0.15);
+    border-color: #06B6D4;
+    box-shadow: 0 8px 25px rgba(6, 182, 212, 0.15);
 }
 
 .card-producto .card-body {
-    background: #141414;
+    background: #1E293B;
     padding: 1rem;
 }
 
@@ -25,12 +94,12 @@
 }
 
 #filtroCategorias .btn.active {
-    background: #3d8bfd;
-    border-color: #3d8bfd;
+    background: #06B6D4;
+    border-color: #06B6D4;
     color: #fff;
 }
 
 #filtroCategorias .btn:hover:not(.active) {
-    background: rgba(61, 139, 253, 0.15);
-    border-color: #3d8bfd;
-}
+    background: rgba(6, 182, 212, 0.15);
+    border-color: #06B6D4;
+}
