@@ -2,3 +2,35 @@
     max-width: 40px;
     margin-right: 5px;
 }
+
+.card-producto {
+    background: #141414;
+    border: 1px solid #2d2d2d;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-producto:hover {
+    transform: translateY(-6px);
+    border-color: #3d8bfd;
+    box-shadow: 0 8px 25px rgba(13, 110, 253, 0.15);
+}
+
+.card-producto .card-body {
+    background: #141414;
+    padding: 1rem;
+}
+
+.card-producto .card-img-top {
+    border-bottom: 1px solid #2d2d2d;
+}
+
+#filtroCategorias .btn.active {
+    background: #3d8bfd;
+    border-color: #3d8bfd;
+    color: #fff;
+}
+
+#filtroCategorias .btn:hover:not(.active) {
+    background: rgba(61, 139, 253, 0.15);
+    border-color: #3d8bfd;
+}
