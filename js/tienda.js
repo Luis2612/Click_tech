@@ -16,7 +16,7 @@ function generarFiltros(productos) {
 
   categorias.forEach(cat => {
     const btn = document.createElement("button");
-    btn.className = "btn btn-outline-light btn-sm rounded-pill px-3";
+    btn.className = "btn btn-outline-light btn-sm rounded-pill px-3 fw-bold";
     btn.setAttribute("data-categoria", cat);
     btn.textContent = cat;
     contenedor.appendChild(btn);
@@ -54,10 +54,11 @@ function crearTarjetaProducto(producto) {
             <span class="badge bg-primary bg-opacity-25 text-primary small">${producto.categoria}</span>
             ${stockBadge}
           </div>
-          <h6 class="card-title fw-bold mb-1">${producto.nombre}</h6>
-          <p class="card-text text-secondary small flex-grow-1">${producto.descripcion.length > 80 ? producto.descripcion.substring(0, 80) + "..." : producto.descripcion}</p>
-          <div class="mt-auto">
-            <span class="fs-5 fw-bold text-primary">$${producto.precio.toLocaleString("es-CO")}</span>
+          <h6 class="card-title fw-bold mb-1 text-color-principal">${producto.nombre}</h6>
+          <p class="card-text text-color-alternativo small flex-grow-1">${producto.descripcion.length > 80 ? producto.descripcion.substring(0, 80) + "..." : producto.descripcion}</p>
+          <div class="mt-auto d-flex align-items-center justify-content-between">
+            <span class="fs-5 fw-bold text-color-resaltar">$${producto.precio.toLocaleString("es-CO")}</span>
+            <button type="button" class="btn btn-outline-info"><i class="bi bi-cart3 fs-4"></i></button>
           </div>
         </div>
       </div>
