@@ -58,7 +58,7 @@ function crearTarjetaProducto(producto) {
           <p class="card-text text-color-alternativo small flex-grow-1">${producto.descripcion.length > 80 ? producto.descripcion.substring(0, 80) + "..." : producto.descripcion}</p>
           <div class="mt-auto d-flex align-items-center justify-content-between">
             <span class="fs-5 fw-bold text-color-resaltar">$${producto.precio.toLocaleString("es-CO")}</span>
-            <button type="button" class="btn btn-outline-info"><i class="bi bi-cart3 fs-4"></i></button>
+            <button type="button" class="btn btn-outline-info" data-id="${producto.id}" onclick="agregarAlCarrito(${producto.id})"><i class="bi bi-cart3 fs-4"></i></button>
           </div>
         </div>
       </div>

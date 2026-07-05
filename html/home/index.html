@@ -35,7 +35,7 @@
           </li>
         </ul>
         <div class="d-flex ms-lg-3">
-          <a href="../catalogo/index.html" class="btn bg-resaltar fw-bold rounded-pill px-3" aria-label="Carrito de compras" title="Catálogo"><i class="bi bi-cart3"></i></a>
+          <a href="#" class="btn bg-resaltar fw-bold rounded-pill px-3 position-relative" onclick="abrirCarrito(); return false;" aria-label="Carrito de compras" title="Carrito"><i class="bi bi-cart3"></i><span class="badge-carrito position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">0</span></a>
         </div>
       </div>
     </div>
@@ -90,6 +90,8 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../../data/productos.js"></script>
+  <script src="../../js/carrito.js"></script>
   <script src="../../js/script.js"></script>
 </body>
 </html>
