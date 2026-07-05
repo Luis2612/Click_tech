@@ -214,3 +214,6 @@ textarea::placeholder{
     animation: pulseBadge 0.35s ease;
 }
 
+.bg-white-img {
+    background: white;
+}
