@@ -108,3 +108,7 @@ textarea::placeholder{
     border-color: #06B6D4;
     color: #06B6D4;
 }
+
+.bg-white-img{
+    background: white;
+}
