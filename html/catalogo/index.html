@@ -34,8 +34,14 @@
             <a class="nav-link fw-bold" href="../contact/index.html">Contacto</a>
           </li>
         </ul>
-        <div class="d-flex ms-lg-3">
-          <a href="#" class="btn bg-resaltar fw-bold rounded-pill px-3" aria-label="Carrito de compras" title="Catálogo"><i class="bi bi-cart3"></i></a>
+        <div class="bag-wrap">
+          <a href="../catalogo/index.html" class="btn bg-resaltar fw-bold rounded-pill px-3"
+            aria-label="Carrito de compras" title="Catálogo"><i class="bi bi-cart3" id="carritoNumero"></i></a>
+          <div class="mini-cart" id="mini-cart">
+            <div class="mini-cart__items" id="mini-cart-items">
+            </div>
+            <a href="../carrito/index.html" class="btn btn--solid mini-cart__go">Ver bolsa completa</a>
+          </div>
         </div>
       </div>
     </div>
@@ -66,7 +72,7 @@
     </section>
   </main>
 
-<footer class="footer footer-custom text-color-alternativo py-5 border-top border-secondary mt-auto">
+  <footer class="footer footer-custom text-color-alternativo py-5 border-top border-secondary mt-auto">
     <div class="container">
       <div class="row g-4 mb-4">
         <div class="col-md-6">

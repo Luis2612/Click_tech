@@ -108,3 +108,103 @@ textarea::placeholder{
     border-color: #06B6D4;
     color: #06B6D4;
 }
+
+/* Carrito compra */
+.bag__count {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--rojo);
+  color: var(--linen);
+  font-size: 0.7rem;
+}
+
+.bag-wrap {
+  position: relative;
+}
+.mini-cart {
+ overflow-y: auto;
+  height: 200px;
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 60;
+  width: 350px;
+  background: var(--cream);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow);
+  padding: var(--s3);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    visibility 0.2s;
+  pointer-events: auto;
+}
+.bag-wrap:hover .mini-cart,
+.mini-cart:hover {
+  opacity: 1;
+  visibility: visible;
+ transform: translateY(0);
+  background: #1E293B;
+}
+.mini-cart__items {
+  display: flex;
+  gap: 1rem;
+  overflow-y: auto;
+  padding-bottom: var(--s2);
+  scrollbar-width: thin;
+  scrollbar-color: var(--rozy) transparent;
+  flex-direction: column;
+  padding: 10px; 
+}
+.mini-cart__items::-webkit-scrollbar {
+  height: 4px;
+}
+.mini-cart__items::-webkit-scrollbar-thumb {
+  background: var(--rozy);
+  border-radius: 99px;
+}
+.mini-cart__item {
+  flex: 0 0 auto;
+  width: 80px;
+  text-align: center;
+}
+.mini-cart__item img {
+  width: 80px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: var(--r);
+  background: var(--pale-oak);
+}
+.mini-cart__item-name {
+  font-size: 0.68rem;
+  font-weight: 600;
+  margin-top: 0.3rem;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mini-cart__item-size {
+  font-size: 0.62rem;
+  color: var(--rozy);
+}
+.mini-cart__empty {
+  font-size: 0.85rem;
+  opacity: 0.6;
+  padding: var(--s2) 0;
+  text-align: center;
+  width: 100%;
+}
+.mini-cart__go {
+  display: block;
+  text-align: center;
+  margin-top: var(--s2);
+  padding: 0.6rem 1.2rem;
+  font-size: 0.82rem;
+}
