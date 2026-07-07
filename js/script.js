@@ -30,6 +30,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }, { threshold: 0.1 });
   textElements.forEach((el) => {
+    // Evitar efecto de máquina de escribir en elementos que contienen enlaces u otros tags HTML
+    if (el.children.length > 0) return;
+
     const originalText = el.textContent.trim().replace(/\s+/g, ' ');
     if (originalText.length > 0) {
       el.setAttribute("data-text", originalText);
