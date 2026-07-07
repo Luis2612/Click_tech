@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrarse | Click Techs</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/styles.css">
+  <link rel="icon" type="image/x-icon" href="../../img/icon/icono.ico">
+  <style>
+    /* Premium glow effects for form inputs */
+    .form-control:focus, .form-select:focus {
+      border-color: #00f2fe;
+      box-shadow: 0 0 10px rgba(0, 242, 254, 0.25);
+      background-color: #0b0b0b !important;
+    }
+    .auth-card {
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+
+<body class="bg-dark text-light d-flex flex-column min-vh-100">
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-black border-bottom border-secondary sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="../home/index.html">
+        <img src="../../img/icono.png" alt="icono_sin_fondo" class="nav_icon">Click Techs
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" href="../home/index.html">Inicio</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../home/index.html#productos">Productos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../about/index.html">Nosotros</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../contact/index.html">Contacto</a>
+          </li>
+        </ul>
+        <div class="d-flex ms-lg-3">
+          <a href="../login/index.html" class="btn btn-outline-light rounded-pill px-4 me-2">Iniciar Sesión</a>
+          <a href="../home/index.html#productos" class="btn btn-primary rounded-pill px-4">Ver Tienda</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Register Section -->
+  <main class="flex-grow-1 py-5 d-flex align-items-center bg-gradient">
+    <div class="container my-4">
+      <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 col-xl-5">
+          <div class="card auth-card text-light p-4 p-md-5 rounded-4 shadow-lg">
+            <div class="text-center mb-4">
+              <i class="bi bi-person-plus-fill display-4 text-primary mb-2"></i>
+              <h2 class="fw-bold mb-1">Crear Cuenta</h2>
+              <p class="text-secondary small">Regístrate para obtener beneficios exclusivos en Click Techs</p>
+            </div>
+
+            <!-- Form (Using bootstrap needs-validation) -->
+            <form id="registerForm" class="needs-validation" novalidate>
+              
+              <!-- Full Name Field -->
+              <div class="mb-3">
+                <label for="nombre" class="form-label small fw-semibold text-secondary">Nombre Completo</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-black border-secondary text-secondary"><i class="bi bi-person"></i></span>
+                  <input type="text" name="nombre" class="form-control bg-black text-light border-secondary" id="nombre" required placeholder="Ej. Juan Pérez" pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$">
+                  <div class="invalid-feedback">El nombre no debe contener números ni caracteres especiales.</div>
+                </div>
+              </div>
+
+              <!-- Email Field -->
+              <div class="mb-3">
+                <label for="email" class="form-label small fw-semibold text-secondary">Correo Electrónico</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-black border-secondary text-secondary"><i class="bi bi-envelope"></i></span>
+                  <input type="email" name="email" class="form-control bg-black text-light border-secondary" id="email" required placeholder="correo@ejemplo.com">
+                  <div class="invalid-feedback">El correo electrónico debe ser válido y terminar en .com</div>
+                </div>
+              </div>
+
+              <!-- Phone Field -->
+              <div class="mb-3">
+                <label for="telefono" class="form-label small fw-semibold text-secondary">Teléfono (10 dígitos)</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-black border-secondary text-secondary"><i class="bi bi-telephone"></i></span>
+                  <input type="tel" name="telefono" class="form-control bg-black text-light border-secondary" id="telefono" required placeholder="3101234567" pattern="^\d{10}$" maxlength="10">
+                  <div class="invalid-feedback">El teléfono debe contener exactamente 10 dígitos numéricos.</div>
+                </div>
+              </div>
+
+              <!-- Password Field -->
+              <div class="mb-3">
+                <label for="password" class="form-label small fw-semibold text-secondary">Contraseña</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-black border-secondary text-secondary"><i class="bi bi-lock"></i></span>
+                  <input type="password" name="password" class="form-control bg-black text-light border-secondary" id="password" required placeholder="••••••••">
+                  <div class="invalid-feedback">Por favor ingresa una contraseña.</div>
+                </div>
+              </div>
+
+              <!-- Confirm Password Field -->
+              <div class="mb-4">
+                <label for="confirmPassword" class="form-label small fw-semibold text-secondary">Confirmar Contraseña</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-black border-secondary text-secondary"><i class="bi bi-lock-fill"></i></span>
+                  <input type="password" name="confirmPassword" class="form-control bg-black text-light border-secondary" id="confirmPassword" required placeholder="••••••••">
+                  <div class="invalid-feedback">Las contraseñas no coinciden.</div>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill py-2 fw-semibold mb-3">
+                Registrarse <i class="bi bi-person-check-fill ms-1"></i>
+              </button>
+
+              <div class="text-center">
+                <p class="small text-secondary mb-0">¿Ya tienes una cuenta? <a href="../login/index.html" class="text-primary text-decoration-none fw-semibold">Inicia sesión aquí</a></p>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-black text-secondary py-5 border-top border-secondary mt-auto">
+    <div class="container">
+      <div class="row g-4 mb-4">
+        <div class="col-md-6">
+          <h5 class="text-light fw-bold"><i class="bi bi-cpu me-2"></i>Click Techs</h5>
+          <p class="small text-secondary">Tu destino definitivo para periféricos y gadgets de alto rendimiento. Diseñado para potenciar tu vida digital.</p>
+        </div>
+        <div class="col-md-3">
+          <h5 class="text-light fw-bold">Enlaces Rápidos</h5>
+          <ul class="list-unstyled small">
+            <li><a href="../home/index.html" class="text-secondary text-decoration-none">Inicio</a></li>
+            <li><a href="../home/index.html#productos" class="text-secondary text-decoration-none">Productos</a></li>
+            <li><a href="../about/index.html" class="text-secondary text-decoration-none">Nosotros</a></li>
+            <li><a href="../contact/index.html" class="text-secondary text-decoration-none">Contacto</a></li>
+          </ul>
+        </div>
+        <div class="col-md-3">
+          <h5 class="text-light fw-bold">Redes Sociales</h5>
+          <div class="d-flex gap-3 mt-2">
+            <a href="#" class="text-secondary"><i class="bi bi-facebook fs-5"></i></a>
+            <a href="#" class="text-secondary"><i class="bi bi-twitter-x fs-5"></i></a>
+            <a href="#" class="text-secondary"><i class="bi bi-instagram fs-5"></i></a>
+          </div>
+        </div>
+      </div>
+      <hr class="border-secondary">
+      <div class="row align-items-center">
+        <div class="col-md-6 text-center text-md-start">
+          <p class="small mb-0">&copy; 2026 Click Techs. Todos los derechos reservados.</p>
+        </div>
+        <div class="col-md-6 text-center text-md-end">
+          <p class="small mb-0">Desarrollado por Luis Guillermo Imbachi Peña</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../../js/script.js"></script>
+  <script src="../../js/auth-validation.js"></script>
+</body>
+
+</html>
