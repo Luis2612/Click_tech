@@ -1,4 +1,15 @@
-import { obtenerProductos } from "./get-data.js";
+function obtenerProductos() {
+    const nuevos = JSON.parse(localStorage.getItem("productos_nuevos") || "[]");
+    const eliminados = JSON.parse(localStorage.getItem("productos_eliminados") || "[]");
+    const editados = JSON.parse(localStorage.getItem("productos_editados") || "{}");
+
+    const base = PRODUCTOS_INICIALES
+        .filter(p => !eliminados.includes(p.id))
+        .map(p => editados[p.id] ? editados[p.id] : p);
+
+    return [...base, ...nuevos];
+}
+
 function obtenerInfoProducto(id){
     const idInt = parseInt(id);
     const productos = obtenerProductos();
@@ -33,7 +44,7 @@ document.addEventListener('DOMContentLoaded',function () {
 function crearTarjetaImages(producto){
     const imagenHTML = producto.imagen ? 
     `<img src="${producto.imagen}" alt="Quantum Core" class="bg-white-img img-fluid rounded w-100"></img>` :
-    `<div class="d-flex align-items-center justify-content-center" style="height: 200px; background: #1a1a1a;">
+    `<div class="d-flex align-items-center justify-content-center" style="height: 400px; background: #1a1a1a;">
         <i class="bi bi-image display-4 text-secondary"></i>
     </div>`
     return `
@@ -58,7 +69,7 @@ function crearTarjetaInfo(producto){
 
         <div class="d-flex align-items-center mb-4 text-warning">
             <div class="me-2">★★★★★</div>
-            <span class=" text-color-alternativo small">(128 Customer Reviews)</span>
+            <span class=" text-color-alternativo small">(128 reseñas de clientes)</span>
         </div>
 
         <h2 class="text-info fw-bold display-6 mb-4">$${producto.precio.toLocaleString("es-CO")}</h2>
@@ -68,13 +79,25 @@ function crearTarjetaInfo(producto){
             ${producto.descripcion}
         </p>
 
-        <div class="mb-4">
-            <button class="btn bg-resaltar text-color-principal fw-bold w-70 py-3 rounded-3"><i class="bi bi-cart3 me-2"></i> Add to Cart</button>
+        <div class="d-flex gap-3 mb-4">
+            <button class="btn bg-resaltar text-color-principal fw-bold w-70 py-3 rounded-3" data-id="${producto.id}" onclick="agregarAlCarrito(${producto.id})">
+                <i class="bi bi-cart3 me-2"></i> Agregar al carrito
+            </button>
+            <button class="btn btn-outline-secondary text-color-principal fw-bold w-70 py-3 rounded-3" onclick="comprarAhora(${producto.id})">
+                <i class="bi bi-cart3 me-2"></i> Comprar ahora
+            </button>
         </div>
 
         <div class="d-flex gap-4 small text-color-alternativo">
-            <span><i class="bi bi-truck me-1 text-color-resaltar"></i> Free Shipping</span>
-            <span><i class="bi bi-shield-check me-1 text-color-resaltar"></i> 2-Year Warranty</span>
+            <span><i class="bi bi-truck me-1 text-color-resaltar"></i> Envio gratis</span>
+            <span><i class="bi bi-shield-check me-1 text-color-resaltar"></i> 2-años de garantia</span>
         </div>
     `
+}
+
+function comprarAhora(productoId) {
+    const agregado = agregarAlCarrito(productoId);
+    if (agregado) {
+        window.location.href = "../carrito/index.html";
+    }
 }

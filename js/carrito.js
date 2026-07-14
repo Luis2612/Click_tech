@@ -18,6 +18,7 @@ function guardarCarrito(carrito) {
   localStorage.setItem(CARRITO_KEY, JSON.stringify(carrito));
   actualizarBadgeCarrito();
   renderizarCarrito();
+  listarProductos();
 }
 
 function agregarAlCarrito(productoId) {
@@ -280,13 +281,94 @@ function renderizarCarrito() {
         <span class="text-color-resaltar fw-bold fs-5">$${resumen.subtotal.toLocaleString("es-CO")}</span>
       </div>
       <div class="d-grid gap-2">
-        <button class="btn bg-resaltar fw-bold rounded-pill text-color-secundario" disabled>
+        <a href="../carrito/index.html" class="btn bg-resaltar fw-bold rounded-pill text-color-secundario">
           <i class="bi bi-bag-check me-2"></i>Proceder al pago
-        </button>
+        </a>
         <button class="btn btn-outline-danger btn-sm rounded-pill" onclick="vaciarCarrito()">
           <i class="bi bi-trash3 me-2"></i>Vaciar carrito
         </button>
       </div>
+    </div>
+  `;
+}
+
+function listarProductos() {
+  const contenedorItems = document.getElementById('list-productos');
+  const contenedorResumen = document.getElementById('resumen-compra');
+  if (!contenedorItems || !contenedorResumen) return;
+
+  const resumen = obtenerResumenCarrito();
+
+  if (resumen.items.length === 0) {
+    contenedorItems.innerHTML = `
+      <div class="carrito-vacio">
+        <i class="bi bi-cart-x display-1 text-secondary mb-3"></i>
+        <h5 class="text-color-principal fw-bold mb-2">Tu carrito está vacío</h5>
+        <p class="text-color-alternativo text-center mb-3">Agrega productos desde el catálogo para verlos aquí.</p>
+        <a href="../catalogo/index.html" class="btn btn-outline-info rounded-pill px-4">
+          <i class="bi bi-shop me-2"></i>Explorar catálogo
+        </a>
+      </div>
+    `;
+  } else {
+    contenedorItems.innerHTML = `
+      <h4 class="fw-bold mb-4 text-color-principal">Mi carrito <span class="fs-6 text-color-alternativo">(${resumen.totalItems} items)</span></h4>
+      ${resumen.items.map(producto => {
+        const imagenHTML = producto.imagen
+          ? `<img src="${producto.imagen}" alt="${producto.nombre}" class="bg-white-img img-fluid rounded">`
+          : `<div class="d-flex align-items-center justify-content-center rounded" style="height: 100px; width:200px; background: #1a1a1a;"><i class="bi bi-image text-secondary"></i></div>`;
+
+        return `
+          <div class="d-flex flex-column gap-3 pb-2">
+            <div class="card bg-secundario-suave p-3 border-0 rounded-3 shadow-sm">
+              <div class="row g-3">
+                <div class="col-3 col-md-3 d-flex align-items-center">
+                  ${imagenHTML}
+                </div>
+                <div class="col-9 col-md-7">
+                  <h6 class="fw-bold mb-1 text-color-principal">${producto.nombre}</h6>
+                  <span class="badge bg-primary bg-opacity-25 text-primary small mb-2">Categoría</span>
+                  <p class="text-color-alternativo small lh-base mb-3">${producto.descripcion}</p>
+                  <div class="input-group input-group-sm" style="max-width: 110px;">
+                    <button class="btn bg-secundario text-color-principal border-0" type="button" onclick="decrementarCantidad(${producto.id})"><i class="bi bi-dash"></i></button>
+                    <input type="text" class="form-control text-center bg-secundario text-color-principal border-0" value="${producto.cantidad}" readonly>
+                    <button class="btn bg-secundario text-color-principal border-0" type="button" onclick="incrementarCantidad(${producto.id})"><i class="bi bi-plus"></i></button>
+                  </div>
+                </div>
+                <div class="col-12 col-md-2 d-flex flex-row flex-md-column justify-content-between align-items-start align-items-md-end mt-md-2">
+                  <button type="button" class="btn btn-link text-danger p-0 border-0 order-2 order-md-1" onclick="eliminarDelCarrito(${producto.id})"><i class="bi bi-trash fs-5"></i></button>
+                  <span class="fw-bold text-color-resaltar order-1 order-md-2">$${producto.totalItem.toLocaleString("es-CO")}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("")}
+    `;
+  }
+
+  contenedorResumen.innerHTML = `
+    <h5 class="text-color-principal fw-bold mb-4">Resumen del pedido</h5>
+    <div class="d-flex justify-content-between mb-2">
+      <span class="text-color-alternativo">Subtotal</span>
+      <span class="text-color-principal">$${resumen.subtotal.toLocaleString("es-CO")}</span>
+    </div>
+    <div class="d-flex justify-content-between mb-2">
+      <span class="text-color-alternativo">Envío</span>
+      <span class="text-color-principal">GRATIS</span>
+    </div>
+    <hr class="border-secondary">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <span class="text-color-principal fw-bold">Total</span>
+      <span class="text-color-resaltar fw-bold fs-4">$${resumen.subtotal.toLocaleString("es-CO")}</span>
+    </div>
+    <div class="d-grid gap-2">
+      <button class="btn bg-resaltar fw-bold rounded-pill text-color-secundario" ${resumen.items.length === 0 ? "disabled" : ""}>
+        <i class="bi bi-credit-card me-2"></i>Confirmar y pagar
+      </button>
+      <a href="../catalogo/index.html" class="btn btn-outline-secondary rounded-pill px-4">
+        <i class="bi bi-arrow-left me-2"></i>Seguir Comprando
+      </a>
     </div>
   `;
 }
@@ -309,4 +391,5 @@ document.addEventListener("DOMContentLoaded", () => {
   crearToastContainer();
   validarCarrito();
   actualizarBadgeCarrito();
+  listarProductos()
 });
