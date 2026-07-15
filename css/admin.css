@@ -1,0 +1,98 @@
+
+.sidebar {
+  min-height: 100vh;
+  background: #1E293B;
+  border-right: 1px solid #2d2d2d;
+}
+
+.sidebar .nav-link {
+  color: #94A3B8;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  transition: all 0.2s ease;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+  color: #F8FAFC;
+  background: rgba(13, 110, 253, 0.15);
+}
+
+.sidebar .nav-link.active {
+  color: #06b6d4;
+}
+.stat-card {
+  border: 1px solid #172033;
+  border-radius: 12px;
+  background: #1E293B;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  border-color: #06b6d4;
+}
+.table-dark-custom {
+  --bs-table-bg: #1E293B;
+  --bs-table-border-color: #2A3547;
+}
+
+.table-dark-custom thead th {
+  background: #06b6d4;
+  /* border-bottom: 2px solid #3d8bfd; */
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #F8FAFC;
+}
+
+.table-dark-custom tbody tr {
+  transition: background 0.15s ease;
+}
+
+.table-dark-custom tbody tr:hover {
+  background: rgba(13, 110, 253, 0.05);
+}
+
+.modal-content, .formulario {
+  background: #1E293B;
+  border: 1px solid #2d2d2d;
+}
+.form-control,
+.form-select {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #3d8bfd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+.btn-outline-info {
+  border-color: #2d2d2d;
+  color: #3d8bfd;
+}
+
+.btn-outline-info:hover {
+  background: rgba(13, 110, 253, 0.15);
+  border-color: #3d8bfd;
+  color: #fff;
+}
+
+.btn-outline-danger {
+  border-color: #2d2d2d;
+  color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+  background: rgba(220, 53, 69, 0.15);
+  border-color: #dc3545;
+}
+@media (max-width: 991.98px) {
+  .sidebar {
+    min-height: auto;
+    border-right: none;
+    border-bottom: 1px solid #2d2d2d;
+  }
+}
