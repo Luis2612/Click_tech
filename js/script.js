@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("%c⚡ Click Techs System: ONLINE ⚡", "color: #00f2fe; font-size: 16px; font-weight: bold;");
   const textElements = document.querySelectorAll(
     "main h1, main p, section h1, section h2, section h3, section h4, section p, footer h5, footer p"
   );
