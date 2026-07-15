@@ -47,19 +47,21 @@ function crearTarjetaProducto(producto) {
 
   return `
     <div class="col-sm-6 col-md-4 col-lg-3">
-      <div class="card card-producto h-100 border-secondary rounded-3 overflow-hidden">
-        ${imagenHTML}
-        <div class="card-body d-flex flex-column">
-          <div class="d-flex justify-content-between align-items-start mb-2">
-            <span class="badge bg-primary bg-opacity-25 text-primary small">${producto.categoria}</span>
-            ${stockBadge}
+      <div class="card card-producto h-100 border-secondary rounded-3 overflow-hidden d-flex flex-column">
+        <a href="product.html?id=${producto.id}" class="text-decoration-none text-reset d-flex flex-column flex-grow-1">
+          ${imagenHTML}
+          <div class="card-body d-flex flex-column flex-grow-1 pb-2">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="badge bg-primary bg-opacity-25 text-primary small">${producto.categoria}</span>
+              ${stockBadge}
+            </div>
+            <h6 class="card-title fw-bold mb-1 text-color-principal">${producto.nombre}</h6>
+            <p class="card-text text-color-alternativo small flex-grow-1">${producto.descripcion.length > 80 ? producto.descripcion.substring(0, 80) + "..." : producto.descripcion}</p>
           </div>
-          <h6 class="card-title fw-bold mb-1 text-color-principal">${producto.nombre}</h6>
-          <p class="card-text text-color-alternativo small flex-grow-1">${producto.descripcion.length > 80 ? producto.descripcion.substring(0, 80) + "..." : producto.descripcion}</p>
-          <div class="mt-auto d-flex align-items-center justify-content-between">
-            <span class="fs-5 fw-bold text-color-resaltar">$${producto.precio.toLocaleString("es-CO")}</span>
-            <button type="button" class="btn btn-outline-info"><i class="bi bi-cart3 fs-4"></i></button>
-          </div>
+        </a>
+        <div class="p-3 pt-0 d-flex align-items-center justify-content-between mt-auto">
+          <span class="fs-5 fw-bold text-color-resaltar">$${producto.precio.toLocaleString("es-CO")}</span>
+          <button type="button" class="btn btn-outline-info" data-id="${producto.id}" onclick="agregarAlCarrito(${producto.id})"><i class="bi bi-cart3 fs-4"></i></button>
         </div>
       </div>
     </div>
