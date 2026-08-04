@@ -51,11 +51,12 @@ function listarProductos(filtro = "") {
     return;
   }
 
+  const fallbackImg = "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80";
   tbody.innerHTML = productos.map(p => `
     <tr>
       <td>
         ${p.imagen
-          ? `<img src="${p.imagen}" alt="${p.nombre}" class="rounded" style="width: 50px; height: 50px; object-fit: cover;">`
+          ? `<img src="${p.imagen}" alt="${p.nombre}" class="rounded" style="width: 50px; height: 50px; object-fit: cover;" onerror="this.onerror=null; this.src='${fallbackImg}';">`
           : `<div class="rounded d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: #2d2d2d;">
                <i class="bi bi-image text-secondary"></i>
              </div>`

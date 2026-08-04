@@ -244,8 +244,9 @@ function renderizarCarrito() {
   }
 
   contenido.innerHTML = resumen.items.map(item => {
+    const fallbackImg = "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80";
     const imagenHTML = item.imagen
-      ? `<img src="${item.imagen}" alt="${item.nombre}" class="carrito-item-img">`
+      ? `<img src="${item.imagen}" alt="${item.nombre}" class="carrito-item-img" onerror="this.onerror=null; this.src='${fallbackImg}';">`
       : `<div class="carrito-item-img carrito-item-img-placeholder"><i class="bi bi-image text-secondary"></i></div>`;
 
     return `

@@ -185,8 +185,9 @@ function crearTarjetaPedido(pedido) {
   const tracker = crearTrackerPasos(pedido.paso);
 
   const itemsHTML = pedido.items.map(item => {
+    const fallbackImg = "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80";
     const imgHTML = item.imagen
-      ? `<img src="${item.imagen}" alt="${item.nombre}" class="pedido-item-img">`
+      ? `<img src="${item.imagen}" alt="${item.nombre}" class="pedido-item-img" onerror="this.onerror=null; this.src='${fallbackImg}';">`
       : `<div class="pedido-item-img d-flex align-items-center justify-content-center bg-dark"><i class="bi bi-image text-secondary"></i></div>`;
 
     return `

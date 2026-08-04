@@ -78,7 +78,7 @@ const PRODUCTOS_INICIALES = [
     "precio": 159900,
     "categoria": "Accesorios",
     "stock": 45,
-    "imagen": "https://images.unsplash.com/photo-1616440342232-017fb7c4a45a?w=600&auto=format&fit=crop&q=80"
+    "imagen": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80"
   },
   {
     "id": 10,
@@ -348,7 +348,7 @@ const PRODUCTOS_INICIALES = [
     "precio": 1199900,
     "categoria": "Sillas & Escritorios",
     "stock": 8,
-    "imagen": "https://images.unsplash.com/photo-1580481072645-022f9a6d83d0?w=600&auto=format&fit=crop&q=80"
+    "imagen": "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=600&auto=format&fit=crop&q=80"
   },
   {
     "id": 40,
@@ -357,7 +357,7 @@ const PRODUCTOS_INICIALES = [
     "precio": 149900,
     "categoria": "Accesorios",
     "stock": 35,
-    "imagen": "https://images.unsplash.com/photo-1616440342232-017fb7c4a45a?w=600&auto=format&fit=crop&q=80"
+    "imagen": "https://images.unsplash.com/photo-1586816879360-004f5b0c51e3?w=600&auto=format&fit=crop&q=80"
   },
   {
     "id": 41,
@@ -384,7 +384,7 @@ const PRODUCTOS_INICIALES = [
     "precio": 49900,
     "categoria": "Accesorios",
     "stock": 80,
-    "imagen": "https://images.unsplash.com/photo-1616440342232-017fb7c4a45a?w=600&auto=format&fit=crop&q=80"
+    "imagen": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80"
   },
   {
     "id": 44,
