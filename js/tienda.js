@@ -354,8 +354,9 @@ function renderProductos(productos) {
 }
 
 function crearTarjetaGrid(producto) {
+  const fallbackImg = "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80";
   const imagenHTML = producto.imagen
-    ? `<img src="${producto.imagen}" alt="${producto.nombre}" class="cat-card-img" loading="lazy">`
+    ? `<img src="${producto.imagen}" alt="${producto.nombre}" class="cat-card-img" loading="lazy" onerror="this.onerror=null; this.src='${fallbackImg}';">`
     : `<div class="cat-card-img-placeholder"><i class="bi bi-image"></i></div>`;
 
   const stockBadge = producto.stock > 10
@@ -390,8 +391,9 @@ function crearTarjetaGrid(producto) {
 }
 
 function crearTarjetaList(producto) {
+  const fallbackImg = "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80";
   const imagenHTML = producto.imagen
-    ? `<img src="${producto.imagen}" alt="${producto.nombre}" loading="lazy">`
+    ? `<img src="${producto.imagen}" alt="${producto.nombre}" loading="lazy" onerror="this.onerror=null; this.src='${fallbackImg}';">`
     : `<div class="cat-list-img-placeholder"><i class="bi bi-image"></i></div>`;
 
   const stockBadge = producto.stock > 10

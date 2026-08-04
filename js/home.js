@@ -84,11 +84,12 @@ function initCarousel(productos) {
   populares.forEach(p => {
     const slide = document.createElement("div");
     slide.className = "carousel-slide";
+    const fallbackImg = "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80";
     slide.innerHTML = `
       <div class="product-card-carousel">
         <div class="product-card-badge">Popular</div>
         <div class="product-card-img-wrap">
-          <img src="${p.imagen}" alt="${p.nombre}" loading="lazy">
+          <img src="${p.imagen}" alt="${p.nombre}" loading="lazy" onerror="this.onerror=null; this.src='${fallbackImg}';">
         </div>
         <div class="product-card-info">
           <span class="product-card-category">${p.categoria}</span>

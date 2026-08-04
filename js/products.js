@@ -42,8 +42,9 @@ document.addEventListener('DOMContentLoaded',function () {
 });
 
 function crearTarjetaImages(producto){
+    const fallbackImg = "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80";
     const imagenHTML = producto.imagen ? 
-    `<img src="${producto.imagen}" alt="Quantum Core" class="bg-white-img img-fluid rounded w-100"></img>` :
+    `<img src="${producto.imagen}" alt="${producto.nombre}" class="bg-white-img img-fluid rounded w-100" onerror="this.onerror=null; this.src='${fallbackImg}';">` :
     `<div class="d-flex align-items-center justify-content-center" style="height: 400px; background: #1a1a1a;">
         <i class="bi bi-image display-4 text-secondary"></i>
     </div>`
