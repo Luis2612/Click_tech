@@ -47,29 +47,106 @@
   </nav>
 
   <main>
-    <section class="py-5">
-      <div class="container my-5">
-        <div class="text-center max-w-2xl mx-auto mb-5">
-          <h1 class="display-4 fw-bold mb-4">Explora Nuestro Catálogo</h1>
-          <p class="lead text-color-alternativo fw-semibold">Encuentra periféricos y gadgets de alto rendimiento seleccionados especialmente para potenciar tu set up digital.</p>
+    <section class="catalogo-hero">
+      <div class="container">
+        <div class="catalogo-hero-content">
+          <h1 class="catalogo-hero-title">Catálogo</h1>
+          <p class="catalogo-hero-sub">Encuentra el periférico perfecto para tu setup</p>
+          <div class="catalogo-search-wrap">
+            <i class="bi bi-search catalogo-search-icon"></i>
+            <input type="text" id="buscadorProductos" class="catalogo-search-input" placeholder="Buscar productos, marcas, categorías...">
+            <button class="catalogo-search-clear d-none" id="searchClear"><i class="bi bi-x-lg"></i></button>
+          </div>
         </div>
       </div>
     </section>
 
-    <section id="productos" class="container mb-5 p-5 border-top border-secondary bg-secondary bg-opacity-10 rounded-5">
-      <div class="d-flex flex-wrap justify-content-center gap-2 mb-4" id="filtroCategorias">
-        <button class="btn btn-outline-light btn-sm rounded-pill px-3 fw-bold active" data-categoria="todas">Todas</button>
+    <section class="container catalogo-body">
+      <div class="catalogo-toolbar">
+        <div class="catalogo-toolbar-left">
+          <button class="catalogo-filter-toggle" id="filterToggle">
+            <i class="bi bi-funnel"></i> Filtros
+          </button>
+          <span class="catalogo-results-count" id="resultsCount"></span>
+        </div>
+        <div class="catalogo-toolbar-right">
+          <div class="catalogo-sort-wrap">
+            <label for="sortSelect" class="catalogo-sort-label">Ordenar:</label>
+            <select id="sortSelect" class="catalogo-sort-select">
+              <option value="default">Relevancia</option>
+              <option value="price-asc">Precio: menor a mayor</option>
+              <option value="price-desc">Precio: mayor a menor</option>
+              <option value="name-asc">Nombre: A - Z</option>
+              <option value="name-desc">Nombre: Z - A</option>
+              <option value="stock-desc">Más disponibles</option>
+            </select>
+          </div>
+          <div class="catalogo-view-toggle">
+            <button class="catalogo-view-btn active" data-view="grid" id="viewGrid"><i class="bi bi-grid-3x3-gap-fill"></i></button>
+            <button class="catalogo-view-btn" data-view="list" id="viewList"><i class="bi bi-list-ul"></i></button>
+          </div>
+        </div>
       </div>
 
-      <div class="row g-4" id="contenedorProductos">
-      </div>
+      <div class="catalogo-layout">
+        <aside class="catalogo-sidebar" id="catalogoSidebar">
+          <div class="sidebar-section">
+            <h4 class="sidebar-title"><i class="bi bi-tag"></i> Categorías</h4>
+            <div id="filterCategorias" class="sidebar-filter-list"></div>
+          </div>
 
-      <div class="text-center py-5 d-none" id="sinProductos">
-        <i class="bi bi-inbox display-4 text-secondary d-block mb-3"></i>
-        <p class="text-secondary">No hay productos disponibles en esta categoría.</p>
+          <div class="sidebar-section">
+            <h4 class="sidebar-title"><i class="bi bi-cash-stack"></i> Precio</h4>
+            <div class="price-range-wrap">
+              <div class="price-range-labels">
+                <span id="precioMinLabel">$0</span>
+                <span id="precioMaxLabel">$0</span>
+              </div>
+              <div class="price-range-sliders">
+                <input type="range" id="precioMin" class="price-slider" min="0" max="2000000" value="0" step="10000">
+                <input type="range" id="precioMax" class="price-slider" min="0" max="2000000" value="2000000" step="10000">
+              </div>
+            </div>
+          </div>
+
+          <div class="sidebar-section">
+            <h4 class="sidebar-title"><i class="bi bi-box-seam"></i> Disponibilidad</h4>
+            <div class="sidebar-filter-list">
+              <label class="filter-check-item">
+                <input type="checkbox" id="filterEnStock" checked>
+                <span class="filter-check-custom"></span>
+                <span class="filter-check-label">En stock</span>
+              </label>
+              <label class="filter-check-item">
+                <input type="checkbox" id="filterPocoStock" checked>
+                <span class="filter-check-custom"></span>
+                <span class="filter-check-label">Últimas unidades</span>
+              </label>
+              <label class="filter-check-item">
+                <input type="checkbox" id="filterAgotado">
+                <span class="filter-check-custom"></span>
+                <span class="filter-check-label">Agotado</span>
+              </label>
+            </div>
+          </div>
+
+          <button class="catalogo-clear-filters" id="clearFilters"><i class="bi bi-arrow-counterclockwise me-2"></i>Limpiar filtros</button>
+        </aside>
+
+        <div class="catalogo-products-area">
+          <div class="catalogo-active-filters" id="activeFilters"></div>
+          <div class="row g-4" id="contenedorProductos"></div>
+          <div class="catalogo-empty d-none" id="sinProductos">
+            <i class="bi bi-search"></i>
+            <h4>No se encontraron productos</h4>
+            <p>Intenta ajustar tus filtros o buscar con otros términos</p>
+            <button class="catalogo-empty-btn" id="resetFromEmpty"><i class="bi bi-arrow-counterclockwise me-2"></i>Limpiar filtros</button>
+          </div>
+        </div>
       </div>
     </section>
   </main>
+
 
 <footer class="footer footer-custom text-color-alternativo py-5 border-top border-secondary mt-auto">
     <div class="container">

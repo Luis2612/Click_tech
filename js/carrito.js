@@ -347,23 +347,53 @@ function listarProductos() {
     `;
   }
 
+  const esGratis = resumen.subtotal >= 150000;
+  const faltante = 150000 - resumen.subtotal;
+  const porcentaje = Math.min(100, Math.round((resumen.subtotal / 150000) * 100));
+
+  let envioTextoHTML = `<span class="text-success fw-bold"><i class="bi bi-gift-fill me-1"></i>GRATIS</span>`;
+  let bannerEnvioHTML = `
+    <div class="p-2.5 rounded-3 mb-3 border text-center" style="background-color: rgba(34, 197, 94, 0.12); border-color: rgba(34, 197, 94, 0.3) !important; color: #4ADE80; font-size: 0.85rem;">
+      <i class="bi bi-truck me-1"></i>¡Genial! Tu compra supera $150.000 y tienes <strong>ENVÍO GRATIS</strong>.
+    </div>
+  `;
+
+  if (!esGratis && resumen.subtotal > 0) {
+    envioTextoHTML = `<span class="text-color-alternativo small">Calculado al pagar</span>`;
+    bannerEnvioHTML = `
+      <div class="mb-3 p-3 bg-secundario rounded-3 border border-secondary">
+        <div class="d-flex justify-content-between small text-color-alternativo mb-1 fw-bold">
+          <span>Progreso Envío GRATIS</span>
+          <span class="text-color-resaltar">Faltan $${faltante.toLocaleString("es-CO")}</span>
+        </div>
+        <div class="progress bg-dark mb-2" style="height: 8px;">
+          <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: ${porcentaje}%; background-color: #06B6D4;"></div>
+        </div>
+        <span class="small text-color-alternativo d-block" style="font-size: 0.78rem;">
+          <i class="bi bi-info-circle me-1 text-info"></i>Envío GRATIS en compras superiores a $150.000.
+        </span>
+      </div>
+    `;
+  }
+
   contenedorResumen.innerHTML = `
     <h5 class="text-color-principal fw-bold mb-4">Resumen del pedido</h5>
+    ${resumen.subtotal > 0 ? bannerEnvioHTML : ""}
     <div class="d-flex justify-content-between mb-2">
       <span class="text-color-alternativo">Subtotal</span>
       <span class="text-color-principal">$${resumen.subtotal.toLocaleString("es-CO")}</span>
     </div>
     <div class="d-flex justify-content-between mb-2">
       <span class="text-color-alternativo">Envío</span>
-      <span class="text-color-principal">GRATIS</span>
+      ${envioTextoHTML}
     </div>
     <hr class="border-secondary">
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <span class="text-color-principal fw-bold">Total</span>
+      <span class="text-color-principal fw-bold">Total estimado</span>
       <span class="text-color-resaltar fw-bold fs-4">$${resumen.subtotal.toLocaleString("es-CO")}</span>
     </div>
     <div class="d-grid gap-2">
-      <button class="btn bg-resaltar fw-bold rounded-pill text-color-secundario" ${resumen.items.length === 0 ? "disabled" : ""}>
+      <button class="btn bg-resaltar fw-bold rounded-pill text-color-secundario" onclick="procesarPagoCarrito()" ${resumen.items.length === 0 ? "disabled" : ""}>
         <i class="bi bi-credit-card me-2"></i>Confirmar y pagar
       </button>
       <a href="../catalogo/index.html" class="btn btn-outline-secondary rounded-pill px-4">
@@ -371,6 +401,502 @@ function listarProductos() {
       </a>
     </div>
   `;
+}
+
+let metodoPagoPasarelaSeleccionado = "tarjeta";
+
+function procesarPagoCarrito() {
+  const usuario = JSON.parse(sessionStorage.getItem("usuarioAutenticado") || "null");
+  if (!usuario) {
+    if (typeof mostrarToastCarrito === "function") {
+      mostrarToastCarrito("Por favor inicia sesión para completar tu compra", "warning");
+    }
+    setTimeout(() => {
+      window.location.href = "../login/index.html";
+    }, 1500);
+    return;
+  }
+
+  const resumen = obtenerResumenCarrito();
+  if (!resumen || resumen.items.length === 0) {
+    if (typeof mostrarToastCarrito === "function") {
+      mostrarToastCarrito("Tu carrito está vacío", "warning");
+    }
+    return;
+  }
+
+  const offcanvasEl = document.getElementById("offcanvasCarrito");
+  if (offcanvasEl) {
+    const instance = bootstrap.Offcanvas.getInstance(offcanvasEl);
+    if (instance) instance.hide();
+  }
+
+  abrirPasarelaPago();
+}
+
+function crearModalPasarelaPago() {
+  const oldModal = document.getElementById("modalPasarelaPago");
+  if (oldModal) oldModal.remove();
+
+  const modalHTML = `
+    <div class="modal fade" id="modalPasarelaPago" tabindex="-1" aria-labelledby="modalPasarelaLabel" aria-hidden="true" data-bs-backdrop="static">
+      <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-secundario-suave border border-secondary text-color-principal rounded-4 shadow-lg overflow-hidden">
+          <div class="modal-header border-secondary bg-secundario py-3">
+            <h5 class="modal-title fw-bold d-flex align-items-center gap-2 flex-wrap" id="modalPasarelaLabel">
+              <i class="bi bi-shield-lock-fill text-success fs-4"></i>
+              <span>Pasarela de Pagos Segura (Click Techs Pay)</span>
+              <span class="pasarela-badge-ssl ms-2"><i class="bi bi-shield-check me-1"></i>256-bit SSL</span>
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+
+          <div class="modal-body p-0" id="pasarelaBodyContent">
+            <div class="row g-0">
+              <div class="col-lg-7 p-4 border-end border-secondary">
+                <h6 class="fw-bold mb-3 text-color-resaltar"><i class="bi bi-wallet2 me-2"></i>1. Selecciona tu método de pago</h6>
+
+                <div class="d-flex gap-2 mb-4 flex-wrap" id="metodosPagoPills">
+                  <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-2" id="btnMetodoTarjeta" style="background-color: rgba(6, 182, 212, 0.2); border: 1px solid #06B6D4; color: #06B6D4; padding: 10px 16px; border-radius: 12px; font-weight: 700;" onclick="cambiarMetodoPagoPasarela('tarjeta')">
+                    <i class="bi bi-credit-card-2-front"></i> <span>Tarjeta</span>
+                  </button>
+                  <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-2" id="btnMetodoPse" style="background-color: #0F172A; border: 1px solid rgba(148, 163, 184, 0.2); color: #CBD5E1; padding: 10px 16px; border-radius: 12px; font-weight: 600;" onclick="cambiarMetodoPagoPasarela('pse')">
+                    <i class="bi bi-bank"></i> <span>PSE</span>
+                  </button>
+                  <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-2" id="btnMetodoNequi" style="background-color: #0F172A; border: 1px solid rgba(148, 163, 184, 0.2); color: #CBD5E1; padding: 10px 16px; border-radius: 12px; font-weight: 600;" onclick="cambiarMetodoPagoPasarela('nequi')">
+                    <i class="bi bi-phone"></i> <span>Nequi</span>
+                  </button>
+                  <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-2" id="btnMetodoContra" style="background-color: #0F172A; border: 1px solid rgba(148, 163, 184, 0.2); color: #CBD5E1; padding: 10px 16px; border-radius: 12px; font-weight: 600;" onclick="cambiarMetodoPagoPasarela('contraentrega')">
+                    <i class="bi bi-box-seam"></i> <span>Contra entrega</span>
+                  </button>
+                </div>
+
+                <form id="formTransaccionPasarela" onsubmit="procesarTransaccionPasarela(event)">
+                  <div id="seccionTarjeta">
+                    <div class="credit-card-visual mb-4" id="creditCardVisual">
+                      <div class="card-visual-bg"></div>
+                      <div class="d-flex justify-content-between align-items-center mb-3">
+                        <i class="bi bi-chip-fill fs-3 text-warning"></i>
+                        <span class="card-brand-logo fw-bold fs-5 fst-italic" id="cardBrandText">VISA</span>
+                      </div>
+                      <div class="card-number-display mb-3" id="cardNumberDisplay">•••• •••• •••• ••••</div>
+                      <div class="d-flex justify-content-between align-items-end">
+                        <div>
+                          <span class="card-label">TITULAR</span>
+                          <div class="card-val-name text-uppercase text-truncate" style="max-width: 180px;" id="cardNameDisplay">NOMBRE DEL TITULAR</div>
+                        </div>
+                        <div class="text-end">
+                          <span class="card-label">EXPIRACIÓN</span>
+                          <div class="card-val-exp" id="cardExpDisplay">MM/YY</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label small fw-bold text-color-alternativo">Nombre en la tarjeta</label>
+                      <input type="text" class="form-control bg-secundario text-color-principal border-secondary" id="inputCardName" placeholder="Ej: LUIS G IMBACCHI" oninput="formatearTarjetaLive()">
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                      <div class="col-8">
+                        <label class="form-label small fw-bold text-color-alternativo">Número de tarjeta</label>
+                        <div class="input-group">
+                          <span class="input-group-text bg-secundario text-color-alternativo border-secondary"><i class="bi bi-credit-card"></i></span>
+                          <input type="text" class="form-control bg-secundario text-color-principal border-secondary" id="inputCardNumber" placeholder="4532 8912 3456 7890" maxlength="19" oninput="formatearTarjetaLive()">
+                        </div>
+                      </div>
+                      <div class="col-4">
+                        <label class="form-label small fw-bold text-color-alternativo">CVV</label>
+                        <input type="password" class="form-control bg-secundario text-color-principal border-secondary text-center" id="inputCardCVV" placeholder="123" maxlength="4">
+                      </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                      <div class="col-6">
+                        <label class="form-label small fw-bold text-color-alternativo">Expiración (MM/YY)</label>
+                        <input type="text" class="form-control bg-secundario text-color-principal border-secondary text-center" id="inputCardExp" placeholder="12/28" maxlength="5" oninput="formatearTarjetaLive()">
+                      </div>
+                      <div class="col-6">
+                        <label class="form-label small fw-bold text-color-alternativo">Cuotas</label>
+                        <select class="form-select bg-secundario text-color-principal border-secondary" id="selectCuotas">
+                          <option value="1">1 cuota (sin interés)</option>
+                          <option value="3">3 cuotas</option>
+                          <option value="6">6 cuotas</option>
+                          <option value="12">12 cuotas</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div id="seccionPSE" class="d-none">
+                    <div class="mb-3">
+                      <label class="form-label small fw-bold text-color-alternativo">Selecciona tu Banco</label>
+                      <select class="form-select bg-secundario text-color-principal border-secondary" id="selectBancoPSE">
+                        <option value="Bancolombia">Bancolombia</option>
+                        <option value="Nequi">Nequi</option>
+                        <option value="Davivienda / Daviplata">Davivienda / Daviplata</option>
+                        <option value="Banco de Bogotá">Banco de Bogotá</option>
+                        <option value="BBVA Colombia">BBVA Colombia</option>
+                        <option value="Scotiabank Colpatria">Scotiabank Colpatria</option>
+                      </select>
+                    </div>
+                    <div class="row g-3 mb-3">
+                      <div class="col-6">
+                        <label class="form-label small fw-bold text-color-alternativo">Tipo de Persona</label>
+                        <select class="form-select bg-secundario text-color-principal border-secondary">
+                          <option value="natural">Natural</option>
+                          <option value="juridica">Jurídica</option>
+                        </select>
+                      </div>
+                      <div class="col-6">
+                        <label class="form-label small fw-bold text-color-alternativo">Documento de Identidad</label>
+                        <input type="text" class="form-control bg-secundario text-color-principal border-secondary" placeholder="1098765432" id="inputPseDoc">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div id="seccionNequi" class="d-none">
+                    <div class="alert bg-secundario border-secondary text-color-principal p-3 rounded-3 mb-3">
+                      <i class="bi bi-phone-vibrate text-info fs-4 me-2"></i>
+                      <span>Ingresa tu celular Nequi. Recibirás una notificación en tu app para autorizar el pago.</span>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label small fw-bold text-color-alternativo">Número de celular Nequi</label>
+                      <input type="tel" class="form-control bg-secundario text-color-principal border-secondary" placeholder="300 123 4567" id="inputTelNequi">
+                    </div>
+                  </div>
+
+                  <div id="seccionContraentrega" class="d-none">
+                    <div class="alert bg-secundario border-secondary text-color-principal p-3 rounded-3 mb-3">
+                      <i class="bi bi-box-seam-fill text-warning fs-4 me-2"></i>
+                      <span>Pagas en efectivo o transferencia cuando el repartidor entregue el pedido en tu domicilio.</span>
+                    </div>
+                  </div>
+
+                  <h6 class="fw-bold mb-3 mt-4 text-color-resaltar"><i class="bi bi-geo-alt me-2"></i>2. Dirección y Ciudad de Envío</h6>
+                  <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                      <label class="form-label small fw-bold text-color-alternativo">Ciudad de destino</label>
+                      <select class="form-select bg-secundario text-color-principal border-secondary" id="selectCiudadPasarela" onchange="calcularEnvioPasarelaLive()" required>
+                        <option value="Bogotá D.C.">Bogotá D.C.</option>
+                        <option value="Medellín">Medellín </option>
+                        <option value="Cali">Cali </option>
+                        <option value="Barranquilla">Barranquilla </option>
+                        <option value="Bucaramanga">Bucaramanga </option>
+                        <option value="Cartagena">Cartagena </option>
+                        <option value="Manizales">Manizales </option>
+                        <option value="Pereira">Pereira </option>
+                        <option value="Cúcuta">Cúcuta </option>
+                        <option value="Pasto">Pasto </option>
+                        <option value="Otras Ciudades">Otras Ciudades </option>
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label small fw-bold text-color-alternativo">Dirección de residencia</label>
+                      <input type="text" class="form-control bg-secundario text-color-principal border-secondary" id="inputDireccionEnvioPasarela" value="Calle 123 # 45 - 67, Apt 502" required>
+                    </div>
+                  </div>
+
+                  <button type="submit" class="btn bg-resaltar text-color-secundario fw-bold w-100 py-3 rounded-pill fs-5 shadow" id="btnPagarPasarela">
+                    <i class="bi bi-lock-fill me-2"></i>Pagar Ahora
+                  </button>
+                </form>
+              </div>
+
+              <div class="col-lg-5 p-4 bg-secundario d-flex flex-column justify-content-between">
+                <div>
+                  <h6 class="fw-bold mb-3 text-color-principal"><i class="bi bi-receipt me-2 text-color-resaltar"></i>Resumen de la Compra</h6>
+                  <div class="pasarela-items-list mb-3" id="pasarelaItemsList" style="max-height: 230px; overflow-y: auto;"></div>
+
+                  <div class="border-top border-secondary pt-3">
+                    <div class="d-flex justify-content-between mb-2 small text-color-alternativo">
+                      <span>Subtotal</span>
+                      <span class="text-color-principal" id="pasarelaSubtotal">$0</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 small text-color-alternativo">
+                      <span>Envío</span>
+                      <span id="pasarelaEnvio" class="fw-bold">$0</span>
+                    </div>
+                    <div id="pasarelaEnvioBanner" class="mt-2 mb-2"></div>
+                    <hr class="border-secondary">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <span class="fw-bold text-color-principal fs-5">Total a pagar</span>
+                      <span class="fw-bold text-color-resaltar fs-3" id="pasarelaTotal">$0</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="pasarela-security-box p-3 rounded-3 text-center border border-secondary mt-3">
+                  <div class="d-flex justify-content-center gap-3 text-secondary mb-2">
+                    <i class="bi bi-shield-check fs-4 text-success"></i>
+                    <i class="bi bi-lock-fill fs-4 text-info"></i>
+                    <i class="bi bi-patch-check-fill fs-4 text-warning"></i>
+                  </div>
+                  <p class="small text-color-alternativo mb-0">Transacción encriptada de extremo a extremo. Tus datos de pago están protegidos por Click Techs Pay.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML("beforeend", modalHTML);
+}
+
+function calcularEnvioPasarelaLive() {
+  const resumen = obtenerResumenCarrito();
+  if (!resumen) return { costoEnvio: 0, totalConEnvio: 0, ciudad: "Bogotá D.C.", esGratis: true };
+
+  const ciudadSelect = document.getElementById("selectCiudadPasarela");
+  const ciudad = ciudadSelect ? ciudadSelect.value : "Bogotá D.C.";
+
+  let costoEnvio = 0;
+  let esGratis = false;
+
+  if (resumen.subtotal >= 150000) {
+    costoEnvio = 0;
+    esGratis = true;
+  } else {
+    if (ciudad.includes("Bogotá")) {
+      costoEnvio = 7000;
+    } else {
+      costoEnvio = 15000;
+    }
+  }
+
+  const totalConEnvio = resumen.subtotal + costoEnvio;
+
+  const envioEl = document.getElementById("pasarelaEnvio");
+  const totalEl = document.getElementById("pasarelaTotal");
+  const btnPagarEl = document.getElementById("btnPagarPasarela");
+  const bannerEl = document.getElementById("pasarelaEnvioBanner");
+
+  if (envioEl) {
+    if (esGratis) {
+      envioEl.innerHTML = `<span class="text-success fw-bold"><i class="bi bi-gift-fill me-1"></i>GRATIS</span>`;
+    } else {
+      envioEl.innerHTML = `<span class="text-color-principal">$${costoEnvio.toLocaleString("es-CO")}</span>`;
+    }
+  }
+
+  if (bannerEl) {
+    if (esGratis) {
+      bannerEl.innerHTML = `
+        <div class="p-2 rounded-3 text-center border" style="background-color: rgba(34, 197, 94, 0.12); border-color: rgba(34, 197, 94, 0.3) !important; color: #4ADE80; font-size: 0.78rem;">
+          <i class="bi bi-gift-fill me-1"></i>¡Envío GRATIS por compras superiores a $150.000!
+        </div>
+      `;
+    } else {
+      const faltante = 150000 - resumen.subtotal;
+      bannerEl.innerHTML = `
+        <div class="p-2.5 rounded-3 border" style="background-color: rgba(6, 182, 212, 0.1); border-color: rgba(6, 182, 212, 0.25) !important; color: #38BDF8; font-size: 0.78rem;">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span><i class="bi bi-truck me-1"></i>Envío (${ciudad})</span>
+            <span class="fw-bold">$${costoEnvio.toLocaleString("es-CO")}</span>
+          </div>
+          <div class="text-color-alternativo" style="font-size: 0.72rem;">Agrega $${faltante.toLocaleString("es-CO")} más para Envío GRATIS</div>
+        </div>
+      `;
+    }
+  }
+
+  if (totalEl) {
+    totalEl.textContent = `$${totalConEnvio.toLocaleString("es-CO")}`;
+  }
+
+  if (btnPagarEl) {
+    btnPagarEl.innerHTML = `<i class="bi bi-lock-fill me-2"></i>Pagar $${totalConEnvio.toLocaleString("es-CO")}`;
+  }
+
+  return { costoEnvio, totalConEnvio, ciudad, esGratis };
+}
+
+function abrirPasarelaPago() {
+  crearModalPasarelaPago();
+
+  const usuario = JSON.parse(sessionStorage.getItem("usuarioAutenticado") || "null");
+  const resumen = obtenerResumenCarrito();
+  if (!resumen) return;
+
+  if (usuario && usuario.nombre) {
+    const inputName = document.getElementById("inputCardName");
+    if (inputName && !inputName.value) inputName.value = usuario.nombre;
+  }
+
+  const itemsContainer = document.getElementById("pasarelaItemsList");
+  if (itemsContainer) {
+    itemsContainer.innerHTML = resumen.items.map(item => `
+      <div class="d-flex align-items-center gap-3 mb-2 pb-2 border-bottom border-secondary">
+        <img src="${item.imagen || ''}" alt="${item.nombre}" style="width: 44px; height: 44px; object-fit: contain; background: #fff; border-radius: 8px; padding: 4px;">
+        <div class="flex-grow-1 min-w-0">
+          <h6 class="small fw-bold text-color-principal mb-0 text-truncate">${item.nombre}</h6>
+          <span class="small text-color-alternativo">Cant: ${item.cantidad} x $${item.precio.toLocaleString("es-CO")}</span>
+        </div>
+        <span class="fw-bold text-color-resaltar small">$${item.totalItem.toLocaleString("es-CO")}</span>
+      </div>
+    `).join("");
+  }
+
+  document.getElementById("pasarelaSubtotal").textContent = `$${resumen.subtotal.toLocaleString("es-CO")}`;
+  calcularEnvioPasarelaLive();
+
+  formatearTarjetaLive();
+
+  const modalEl = document.getElementById("modalPasarelaPago");
+  const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+  modal.show();
+}
+
+function cambiarMetodoPagoPasarela(metodo) {
+  metodoPagoPasarelaSeleccionado = metodo;
+
+  const btnIds = ["btnMetodoTarjeta", "btnMetodoPse", "btnMetodoNequi", "btnMetodoContra"];
+  btnIds.forEach(id => {
+    const b = document.getElementById(id);
+    if (b) {
+      b.style.backgroundColor = "#0F172A";
+      b.style.borderColor = "rgba(148, 163, 184, 0.2)";
+      b.style.color = "#CBD5E1";
+      b.style.fontWeight = "600";
+      b.style.boxShadow = "none";
+    }
+  });
+
+  let activeId = "btnMetodoTarjeta";
+  if (metodo === "pse") activeId = "btnMetodoPse";
+  if (metodo === "nequi") activeId = "btnMetodoNequi";
+  if (metodo === "contraentrega") activeId = "btnMetodoContra";
+
+  const activeBtn = document.getElementById(activeId);
+  if (activeBtn) {
+    activeBtn.style.backgroundColor = "rgba(6, 182, 212, 0.2)";
+    activeBtn.style.borderColor = "#06B6D4";
+    activeBtn.style.color = "#06B6D4";
+    activeBtn.style.fontWeight = "700";
+    activeBtn.style.boxShadow = "0 0 12px rgba(6, 182, 212, 0.25)";
+  }
+
+  document.getElementById("seccionTarjeta")?.classList.toggle("d-none", metodo !== "tarjeta");
+  document.getElementById("seccionPSE")?.classList.toggle("d-none", metodo !== "pse");
+  document.getElementById("seccionNequi")?.classList.toggle("d-none", metodo !== "nequi");
+  document.getElementById("seccionContraentrega")?.classList.toggle("d-none", metodo !== "contraentrega");
+}
+
+function formatearTarjetaLive() {
+  const numInput = document.getElementById("inputCardNumber");
+  const nameInput = document.getElementById("inputCardName");
+  const expInput = document.getElementById("inputCardExp");
+
+  if (!numInput) return;
+
+  let v = numInput.value.replace(/\D/g, "");
+  let formatted = "";
+  for (let i = 0; i < v.length; i++) {
+    if (i > 0 && i % 4 === 0) formatted += " ";
+    formatted += v[i];
+  }
+  numInput.value = formatted;
+
+  const cardNumDisplay = document.getElementById("cardNumberDisplay");
+  if (cardNumDisplay) cardNumDisplay.textContent = formatted.length > 0 ? formatted : "•••• •••• •••• ••••";
+
+  const cardBrandText = document.getElementById("cardBrandText");
+  if (cardBrandText) {
+    if (v.startsWith("4")) cardBrandText.textContent = "VISA";
+    else if (v.startsWith("5")) cardBrandText.textContent = "MASTERCARD";
+    else if (v.startsWith("3")) cardBrandText.textContent = "AMEX";
+    else cardBrandText.textContent = "CARD";
+  }
+
+  const cardNameDisplay = document.getElementById("cardNameDisplay");
+  if (cardNameDisplay) cardNameDisplay.textContent = nameInput && nameInput.value.trim().length > 0 ? nameInput.value : "NOMBRE DEL TITULAR";
+
+  const cardExpDisplay = document.getElementById("cardExpDisplay");
+  if (cardExpDisplay) cardExpDisplay.textContent = expInput && expInput.value.trim().length > 0 ? expInput.value : "MM/YY";
+}
+
+function procesarTransaccionPasarela(event) {
+  event.preventDefault();
+
+  const usuario = JSON.parse(sessionStorage.getItem("usuarioAutenticado") || "null");
+  if (!usuario) return;
+
+  const resumen = obtenerResumenCarrito();
+  if (!resumen || resumen.items.length === 0) return;
+
+  const bodyContent = document.getElementById("pasarelaBodyContent");
+  if (!bodyContent) return;
+
+  const infoEnvio = calcularEnvioPasarelaLive();
+  const direccionInput = document.getElementById("inputDireccionEnvioPasarela")?.value || "Calle 123 # 45 - 67";
+  const direccionCompleta = `${direccionInput}, ${infoEnvio.ciudad}`;
+
+  let nombreMetodo = "Tarjeta de Crédito (Visa)";
+  if (metodoPagoPasarelaSeleccionado === "pse") {
+    const banco = document.getElementById("selectBancoPSE")?.value || "Bancolombia";
+    nombreMetodo = `PSE (${banco})`;
+  } else if (metodoPagoPasarelaSeleccionado === "nequi") {
+    nombreMetodo = "Nequi";
+  } else if (metodoPagoPasarelaSeleccionado === "contraentrega") {
+    nombreMetodo = "Pago Contra entrega";
+  }
+
+  bodyContent.innerHTML = `
+    <div class="p-5 text-center my-4">
+      <div class="spinner-border text-info mb-4" style="width: 3.5rem; height: 3.5rem;" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <h4 class="fw-bold text-color-principal mb-2">Procesando transacción segura...</h4>
+      <p class="text-color-alternativo small">Conectando con la pasarela de pago de Click Techs. No cierres la ventana.</p>
+    </div>
+  `;
+
+  setTimeout(() => {
+    bodyContent.innerHTML = `
+      <div class="p-5 text-center my-4">
+        <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-25 text-success rounded-circle mb-3 p-3" style="width: 80px; height: 80px;">
+          <i class="bi bi-check-circle-fill display-4"></i>
+        </div>
+        <h3 class="fw-bold text-color-principal mb-2">¡Pago Aprobado con Éxito!</h3>
+        <p class="text-color-alternativo mb-4">Tu pedido ha sido registrado y está en preparación.</p>
+        <span class="badge bg-success px-4 py-2 fs-6 rounded-pill mb-3">Aprobado #PAS-${Math.floor(100000 + Math.random() * 900000)}</span>
+      </div>
+    `;
+
+    const numAleatorio = Math.floor(100000 + Math.random() * 900000);
+    const nuevoPedido = {
+      id: `CT-${numAleatorio}`,
+      fecha: new Date().toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }),
+      timestamp: Date.now(),
+      estado: "en-proceso",
+      paso: 2,
+      pasoTexto: "En preparación por el equipo de almacén",
+      transportadora: "Servientrega",
+      guia: `CT-TRK-${numAleatorio}`,
+      direccion: direccionCompleta,
+      metodoPago: nombreMetodo,
+      items: resumen.items,
+      subtotal: resumen.subtotal,
+      costoEnvio: infoEnvio.costoEnvio,
+      total: infoEnvio.totalConEnvio
+    };
+
+    const keyPedidos = `pedidos_${usuario.email}`;
+    let pedidos = JSON.parse(localStorage.getItem(keyPedidos) || "[]");
+    pedidos.unshift(nuevoPedido);
+    localStorage.setItem(keyPedidos, JSON.stringify(pedidos));
+
+    vaciarCarrito();
+
+    setTimeout(() => {
+      const modalEl = document.getElementById("modalPasarelaPago");
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      if (modal) modal.hide();
+      window.location.href = "../pedidos/index.html";
+    }, 1800);
+  }, 2200);
 }
 
 function _rutaCatalogo() {

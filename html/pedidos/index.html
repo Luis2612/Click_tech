@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Pedidos | Click Techs</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/styles.css">
+  <link rel="icon" type="image/x-icon" href="../../img/icon/icono.ico">
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+  <nav class="navbar navbar-custom navbar-expand-lg border-bottom border-secondary sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold text-color-principal" href="../home/index.html">
+        <img src="../../img/icono.png" alt="icono_sin_fondo" class="nav_icon">Click Techs
+      </a>
+      <button class="navbar-toggler bg-resaltar text-color-secundario" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="bi bi-list text-white fs-1"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link fw-bold" href="../home/index.html">Inicio</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link fw-bold" href="../catalogo/index.html">Catálogo</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link fw-bold" href="../about/index.html">Nosotros</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link fw-bold" href="../contact/index.html">Contacto</a>
+          </li>
+        </ul>
+        <div class="d-flex ms-lg-3 align-items-end">
+          <div>
+            <span style="font-size:12px;" id="nombreUsuario"></span>
+            <div>
+              <a href="../login/index.html" id="inicioSesion" class="btn btn-outline-light rounded-pill px-4 me-2">Iniciar Sesión</a>
+            </div>   
+          </div>
+          <a href="#" class="btn bg-resaltar fw-bold rounded-pill px-3 position-relative" onclick="abrirCarrito(); return false;" aria-label="Carrito de compras" title="Carrito"><i class="bi bi-cart3"></i><span class="badge-carrito position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">0</span></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="pedidos-main py-5">
+    <div class="container">
+      <div class="pedidos-hero mb-4">
+        <div class="row align-items-center">
+          <div class="col-lg-7">
+            <span class="pedidos-badge"><i class="bi bi-shield-check"></i> Panel del Cliente</span>
+            <h1 class="pedidos-title">Mis Pedidos</h1>
+            <p class="pedidos-subtitle">Hola <strong id="usuarioNombreHeading" class="text-color-resaltar">Cliente</strong>, aquí puedes revisar el estado en tiempo real de tus pedidos y tu historial de compras.</p>
+          </div>
+          <div class="col-lg-5">
+            <div class="pedidos-stats-grid">
+              <div class="stat-card">
+                <div class="stat-icon icon-total"><i class="bi bi-bag"></i></div>
+                <div class="stat-info">
+                  <span class="stat-number" id="statTotal">0</span>
+                  <span class="stat-label">Total Pedidos</span>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon icon-proceso"><i class="bi bi-clock-history"></i></div>
+                <div class="stat-info">
+                  <span class="stat-number" id="statProceso">0</span>
+                  <span class="stat-label">En Proceso</span>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon icon-entrega"><i class="bi bi-truck"></i></div>
+                <div class="stat-info">
+                  <span class="stat-number" id="statEntrega">0</span>
+                  <span class="stat-label">En Entrega</span>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon icon-entregados"><i class="bi bi-check-circle-fill"></i></div>
+                <div class="stat-info">
+                  <span class="stat-number" id="statEntregados">0</span>
+                  <span class="stat-label">Entregados</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pedidos-tabs-wrap mb-4">
+        <div class="pedidos-tabs" id="tabsPedidos">
+          <button class="tab-btn active" data-filtro="todos">
+            <i class="bi bi-grid-fill me-2"></i>Todos <span class="tab-badge" id="countTabTodos">0</span>
+          </button>
+          <button class="tab-btn" data-filtro="en-proceso">
+            <i class="bi bi-gear-wide-connected me-2"></i>En proceso <span class="tab-badge" id="countTabProceso">0</span>
+          </button>
+          <button class="tab-btn" data-filtro="en-entrega">
+            <i class="bi bi-truck me-2"></i>En entrega <span class="tab-badge" id="countTabEntrega">0</span>
+          </button>
+          <button class="tab-btn" data-filtro="entregado">
+            <i class="bi bi-history me-2"></i>Historial de compras <span class="tab-badge" id="countTabHistorial">0</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="pedidos-list-container">
+        <div id="contenedorPedidos" class="d-flex flex-column gap-4"></div>
+        <div class="pedidos-empty d-none" id="sinPedidos">
+          <i class="bi bi-box-seam display-1 text-secondary mb-3 d-block"></i>
+          <h4>No se encontraron pedidos</h4>
+          <p class="text-color-alternativo">No tienes pedidos en este estado. Explora nuestro catálogo y realiza tu compra.</p>
+          <a href="../catalogo/index.html" class="btn btn-outline-info rounded-pill px-4 mt-2">
+            <i class="bi bi-shop me-2"></i>Explorar catálogo
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal fade" id="modalRastreo" tabindex="-1" aria-labelledby="modalRastreoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content bg-secundario-suave border border-secondary text-color-principal">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title fw-bold" id="modalRastreoLabel">
+            <i class="bi bi-pin-map-fill me-2 text-color-resaltar"></i>Rastreo de Envío - <span id="rastreoIdPedido"></span>
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="rastreo-summary-box mb-4">
+            <div class="row g-3 text-center text-md-start">
+              <div class="col-md-4">
+                <span class="text-color-alternativo small">Empresa de Transporte</span>
+                <h6 class="fw-bold mb-0 text-color-resaltar" id="rastreoTransportadora">-</h6>
+              </div>
+              <div class="col-md-4">
+                <span class="text-color-alternativo small">Número de Guía</span>
+                <h6 class="fw-bold mb-0 text-color-principal" id="rastreoGuia">-</h6>
+              </div>
+              <div class="col-md-4">
+                <span class="text-color-alternativo small">Estado Actual</span>
+                <h6 class="fw-bold mb-0 text-success" id="rastreoEstadoActual">-</h6>
+              </div>
+            </div>
+          </div>
+          <h6 class="fw-bold mb-3 text-color-principal"><i class="bi bi-clock-history me-2"></i>Línea de Tiempo del Envío</h6>
+          <div class="rastreo-timeline" id="rastreoTimeline"></div>
+        </div>
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer footer-custom text-color-alternativo py-5 border-top border-secondary mt-auto">
+    <div class="container">
+      <div class="row g-4 mb-4">
+        <div class="col-md-6">
+          <h5 class="text-color-resaltar fw-bold">Click Techs</h5>
+          <p class="small text-color-alternativo">Tu destino definitivo para periféricos y gadgets de alto rendimiento. Diseñado para potenciar tu vida digital.</p>
+        </div>
+        <div class="col-md-3">
+          <h5 class="text-color-resaltar fw-bold">Enlaces Rápidos</h5>
+          <ul class="list-unstyled small" id="enlacesRapidos">
+            <li><a href="../home/index.html" class="text-color-alternativo text-decoration-none">Inicio</a></li>
+            <li><a href="../catalogo/index.html" class="text-color-alternativo text-decoration-none">Catálogo</a></li>
+            <li><a href="../about/index.html" class="text-color-alternativo text-decoration-none">Nosotros</a></li>
+            <li><a href="../contact/index.html" class="text-color-alternativo text-decoration-none">Contacto</a></li>
+          </ul>
+        </div>
+        <div class="col-md-3">
+          <h5 class="text-color-resaltar fw-bold">Redes Sociales</h5>
+          <div class="d-flex gap-3 mt-2">
+            <a href="#" class="text-color-alternativo"><i class="bi bi-facebook fs-5"></i></a>
+            <a href="#" class="text-color-alternativo"><i class="bi bi-twitter-x fs-5"></i></a>
+            <a href="#" class="text-color-alternativo"><i class="bi bi-instagram fs-5"></i></a>
+          </div>
+        </div>
+      </div>
+      <hr class="border-secondary">
+      <div class="row align-items-center">
+        <div class="col-md-6 text-center text-md-start">
+          <p class="small mb-0">&copy; 2026 Click Techs. Todos los derechos reservados.</p>
+        </div>
+        <div class="col-md-6 text-center text-md-end">
+          <p class="small mb-0">Desarrollado por Luis Guillermo Imbachi Peña, Lina Gallardo Corrales, Julian Santiago Gonzalez Malpica, Diego Ivan Fonseca Conde y Manuel F. Caballero Escobar</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../../data/productos.js"></script>
+  <script src="../../js/carrito.js"></script>
+  <script src="../../js/pedidos.js"></script>
+  <script src="../../js/script.js"></script>
+  <script src="../../js/sesion.js"></script>
+</body>
+</html>

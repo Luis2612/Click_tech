@@ -89,8 +89,11 @@ function crearTarjetaInfo(producto){
         </div>
 
         <div class="d-flex gap-4 small text-color-alternativo">
-            <span><i class="bi bi-truck me-1 text-color-resaltar"></i> Envio gratis</span>
-            <span><i class="bi bi-shield-check me-1 text-color-resaltar"></i> 2-años de garantia</span>
+            ${producto.precio >= 150000 
+                ? `<span><i class="bi bi-truck me-1 text-color-resaltar"></i> Envío gratis</span>` 
+                : `<span><i class="bi bi-truck me-1 text-color-resaltar"></i> Envío gratis desde $150.000</span>`
+            }
+            <span><i class="bi bi-shield-check me-1 text-color-resaltar"></i> 2-años de garantía</span>
         </div>
     `
 }
