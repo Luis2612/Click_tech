@@ -2,11 +2,14 @@ const CARRITO_KEY = "carrito";
 
 function _obtenerProductosDisponibles() {
   const nuevos = JSON.parse(localStorage.getItem("productos_nuevos") || "[]");
-  const eliminados = JSON.parse(localStorage.getItem("productos_eliminados") || "[]");
+  const eliminados = JSON.parse(localStorage.getItem("productos_eliminados") || "[]").map(id => Number(id));
   const editados = JSON.parse(localStorage.getItem("productos_editados") || "{}");
   const base = PRODUCTOS_INICIALES
-    .filter(p => !eliminados.includes(p.id))
-    .map(p => editados[p.id] ? editados[p.id] : p);
+    .filter(p => !eliminados.includes(Number(p.id)))
+    .map(p => {
+      const idNum = Number(p.id);
+      return editados[idNum] ? editados[idNum] : (editados[p.id] ? editados[p.id] : p);
+    });
   return [...base, ...nuevos];
 }
 

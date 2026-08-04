@@ -1,11 +1,14 @@
 function obtenerProductos() {
   const nuevos = JSON.parse(localStorage.getItem("productos_nuevos") || "[]");
-  const eliminados = JSON.parse(localStorage.getItem("productos_eliminados") || "[]");
+  const eliminados = JSON.parse(localStorage.getItem("productos_eliminados") || "[]").map(id => Number(id));
   const editados = JSON.parse(localStorage.getItem("productos_editados") || "{}");
 
   const base = PRODUCTOS_INICIALES
-    .filter(p => !eliminados.includes(p.id))
-    .map(p => editados[p.id] ? editados[p.id] : p);
+    .filter(p => !eliminados.includes(Number(p.id)))
+    .map(p => {
+      const idNum = Number(p.id);
+      return editados[idNum] ? editados[idNum] : (editados[p.id] ? editados[p.id] : p);
+    });
 
   return [...base, ...nuevos];
 }
@@ -105,10 +108,11 @@ function agregarProducto(datos) {
   return nuevoProducto;
 }
 function editarProducto(id, datos) {
-  const esBase = PRODUCTOS_INICIALES.some(p => p.id === id);
+  const idNum = Number(id);
+  const esBase = PRODUCTOS_INICIALES.some(p => Number(p.id) === idNum);
 
   const productoActualizado = {
-    id: id,
+    id: idNum,
     nombre: datos.nombre.trim(),
     descripcion: datos.descripcion.trim(),
     precio: parseInt(datos.precio),
@@ -120,14 +124,14 @@ function editarProducto(id, datos) {
   if (esBase) {
     const editados = JSON.parse(localStorage.getItem("productos_editados") || "{}");
     if (!datos.imagen) {
-      const original = PRODUCTOS_INICIALES.find(p => p.id === id);
-      productoActualizado.imagen = editados[id]?.imagen || original.imagen || "";
+      const original = PRODUCTOS_INICIALES.find(p => Number(p.id) === idNum);
+      productoActualizado.imagen = editados[idNum]?.imagen || editados[String(idNum)]?.imagen || original?.imagen || "";
     }
-    editados[id] = productoActualizado;
+    editados[idNum] = productoActualizado;
     localStorage.setItem("productos_editados", JSON.stringify(editados));
   } else {
     const nuevos = JSON.parse(localStorage.getItem("productos_nuevos") || "[]");
-    const index = nuevos.findIndex(p => p.id === id);
+    const index = nuevos.findIndex(p => Number(p.id) === idNum);
     if (index !== -1) {
       if (!datos.imagen) {
         productoActualizado.imagen = nuevos[index].imagen || "";
@@ -142,27 +146,42 @@ function editarProducto(id, datos) {
   return productoActualizado;
 }
 function eliminarProducto(id) {
+  const idNum = Number(id);
   const productos = obtenerProductos();
-  const producto = productos.find(p => p.id === id);
+  const producto = productos.find(p => Number(p.id) === idNum);
   if (!producto) {
     mostrarToast("Producto no encontrado", "danger");
     return false;
   }
 
-  const esBase = PRODUCTOS_INICIALES.some(p => p.id === id);
+  const esBase = PRODUCTOS_INICIALES.some(p => Number(p.id) === idNum);
 
   if (esBase) {
-    const eliminados = JSON.parse(localStorage.getItem("productos_eliminados") || "[]");
-    eliminados.push(id);
+    let eliminados = JSON.parse(localStorage.getItem("productos_eliminados") || "[]").map(x => Number(x));
+    if (!eliminados.includes(idNum)) {
+      eliminados.push(idNum);
+    }
     localStorage.setItem("productos_eliminados", JSON.stringify(eliminados));
 
     const editados = JSON.parse(localStorage.getItem("productos_editados") || "{}");
-    delete editados[id];
+    delete editados[idNum];
+    delete editados[String(idNum)];
     localStorage.setItem("productos_editados", JSON.stringify(editados));
   } else {
     let nuevos = JSON.parse(localStorage.getItem("productos_nuevos") || "[]");
-    nuevos = nuevos.filter(p => p.id !== id);
+    nuevos = nuevos.filter(p => Number(p.id) !== idNum);
     localStorage.setItem("productos_nuevos", JSON.stringify(nuevos));
+
+    const editados = JSON.parse(localStorage.getItem("productos_editados") || "{}");
+    delete editados[idNum];
+    delete editados[String(idNum)];
+    localStorage.setItem("productos_editados", JSON.stringify(editados));
+  }
+
+  let carrito = JSON.parse(localStorage.getItem("carrito") || "[]");
+  const carritoFiltrado = carrito.filter(item => Number(item.id) !== idNum);
+  if (carrito.length !== carritoFiltrado.length) {
+    localStorage.setItem("carrito", JSON.stringify(carritoFiltrado));
   }
 
   listarProductos();
