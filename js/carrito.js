@@ -385,7 +385,7 @@ function listarProductos() {
           <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: ${porcentaje}%; background-color: #06B6D4;"></div>
         </div>
         <span class="small text-color-alternativo d-block" style="font-size: 0.78rem;">
-          <i class="bi bi-info-circle me-1 text-info"></i>Envío GRATIS en compras superiores a $150.000 ($7.000 Bogotá / $15.000 resto del país).
+          <i class="bi bi-info-circle me-1 text-info"></i>Envío GRATIS en compras superiores a $150.000.
         </span>
       </div>
     `;
