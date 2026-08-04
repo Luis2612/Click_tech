@@ -292,6 +292,16 @@ function renderizarCarrito() {
   `;
 }
 
+function esPrimeraCompra(email) {
+  if (!email || typeof email !== "string" || !email.trim()) {
+    return true;
+  }
+  const cleanEmail = email.trim().toLowerCase();
+  const keyPedidos = `pedidos_${cleanEmail}`;
+  const historial = JSON.parse(localStorage.getItem(keyPedidos) || "[]");
+  return historial.length === 0;
+}
+
 function listarProductos() {
   const contenedorItems = document.getElementById('list-productos');
   const contenedorResumen = document.getElementById('resumen-compra');
@@ -347,6 +357,11 @@ function listarProductos() {
     `;
   }
 
+  const usuarioAct = JSON.parse(sessionStorage.getItem("usuarioAutenticado") || "null");
+  const esPrimeraCart = esPrimeraCompra(usuarioAct ? usuarioAct.email : "");
+  const descuento10Cart = (esPrimeraCart && resumen.subtotal > 0) ? Math.round(resumen.subtotal * 0.10) : 0;
+  const subtotalConDescuentoCart = Math.max(0, resumen.subtotal - descuento10Cart);
+
   const esGratis = resumen.subtotal >= 150000;
   const faltante = 150000 - resumen.subtotal;
   const porcentaje = Math.min(100, Math.round((resumen.subtotal / 150000) * 100));
@@ -370,8 +385,18 @@ function listarProductos() {
           <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: ${porcentaje}%; background-color: #06B6D4;"></div>
         </div>
         <span class="small text-color-alternativo d-block" style="font-size: 0.78rem;">
-          <i class="bi bi-info-circle me-1 text-info"></i>Envío GRATIS en compras superiores a $150.000.
+          <i class="bi bi-info-circle me-1 text-info"></i>Envío GRATIS en compras superiores a $150.000 ($7.000 Bogotá / $15.000 resto del país).
         </span>
+      </div>
+    `;
+  }
+
+  let rowDescuentoCartHTML = "";
+  if (esPrimeraCart && descuento10Cart > 0) {
+    rowDescuentoCartHTML = `
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-success fw-bold"><i class="bi bi-tag-fill me-1"></i>Descuento 1ª Compra (10%)</span>
+        <span class="text-success fw-bold">-$${descuento10Cart.toLocaleString("es-CO")}</span>
       </div>
     `;
   }
@@ -383,6 +408,7 @@ function listarProductos() {
       <span class="text-color-alternativo">Subtotal</span>
       <span class="text-color-principal">$${resumen.subtotal.toLocaleString("es-CO")}</span>
     </div>
+    ${rowDescuentoCartHTML}
     <div class="d-flex justify-content-between mb-2">
       <span class="text-color-alternativo">Envío</span>
       ${envioTextoHTML}
@@ -390,7 +416,7 @@ function listarProductos() {
     <hr class="border-secondary">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <span class="text-color-principal fw-bold">Total estimado</span>
-      <span class="text-color-resaltar fw-bold fs-4">$${resumen.subtotal.toLocaleString("es-CO")}</span>
+      <span class="text-color-resaltar fw-bold fs-4">$${subtotalConDescuentoCart.toLocaleString("es-CO")}</span>
     </div>
     <div class="d-grid gap-2">
       <button class="btn bg-resaltar fw-bold rounded-pill text-color-secundario" onclick="procesarPagoCarrito()" ${resumen.items.length === 0 ? "disabled" : ""}>
@@ -634,6 +660,10 @@ function crearModalPasarelaPago() {
                       <span>Subtotal</span>
                       <span class="text-color-principal" id="pasarelaSubtotal">$0</span>
                     </div>
+                    <div class="d-flex justify-content-between mb-2 small d-none" id="rowPasarelaDescuento">
+                      <span class="text-success fw-bold"><i class="bi bi-tag-fill me-1"></i>Descuento 1ª Compra (10%)</span>
+                      <span class="text-success fw-bold" id="pasarelaDescuento">-$0</span>
+                    </div>
                     <div class="d-flex justify-content-between mb-2 small text-color-alternativo">
                       <span>Envío</span>
                       <span id="pasarelaEnvio" class="fw-bold">$0</span>
@@ -668,7 +698,15 @@ function crearModalPasarelaPago() {
 
 function calcularEnvioPasarelaLive() {
   const resumen = obtenerResumenCarrito();
-  if (!resumen) return { costoEnvio: 0, totalConEnvio: 0, ciudad: "Bogotá D.C.", esGratis: true };
+  if (!resumen) return { costoEnvio: 0, descuento: 0, totalConEnvio: 0, ciudad: "Bogotá D.C.", esGratis: true, esPrimera: true };
+
+  const usuario = JSON.parse(sessionStorage.getItem("usuarioAutenticado") || "null");
+  const guestEmail = document.getElementById("inputGuestEmail")?.value || "";
+  const emailEvaluado = usuario ? usuario.email : guestEmail;
+
+  const esPrimera = esPrimeraCompra(emailEvaluado);
+  const descuento = (esPrimera && resumen.subtotal > 0) ? Math.round(resumen.subtotal * 0.10) : 0;
+  const subtotalConDescuento = Math.max(0, resumen.subtotal - descuento);
 
   const ciudadSelect = document.getElementById("selectCiudadPasarela");
   const ciudad = ciudadSelect ? ciudadSelect.value : "Bogotá D.C.";
@@ -687,12 +725,23 @@ function calcularEnvioPasarelaLive() {
     }
   }
 
-  const totalConEnvio = resumen.subtotal + costoEnvio;
+  const totalFinal = subtotalConDescuento + costoEnvio;
 
+  const rowDescuentoEl = document.getElementById("rowPasarelaDescuento");
+  const descuentoEl = document.getElementById("pasarelaDescuento");
   const envioEl = document.getElementById("pasarelaEnvio");
   const totalEl = document.getElementById("pasarelaTotal");
   const btnPagarEl = document.getElementById("btnPagarPasarela");
   const bannerEl = document.getElementById("pasarelaEnvioBanner");
+
+  if (rowDescuentoEl && descuentoEl) {
+    if (esPrimera && descuento > 0) {
+      rowDescuentoEl.classList.remove("d-none");
+      descuentoEl.textContent = `-$${descuento.toLocaleString("es-CO")}`;
+    } else {
+      rowDescuentoEl.classList.add("d-none");
+    }
+  }
 
   if (envioEl) {
     if (esGratis) {
@@ -724,14 +773,14 @@ function calcularEnvioPasarelaLive() {
   }
 
   if (totalEl) {
-    totalEl.textContent = `$${totalConEnvio.toLocaleString("es-CO")}`;
+    totalEl.textContent = `$${totalFinal.toLocaleString("es-CO")}`;
   }
 
   if (btnPagarEl) {
-    btnPagarEl.innerHTML = `<i class="bi bi-lock-fill me-2"></i>Pagar $${totalConEnvio.toLocaleString("es-CO")}`;
+    btnPagarEl.innerHTML = `<i class="bi bi-lock-fill me-2"></i>Pagar $${totalFinal.toLocaleString("es-CO")}`;
   }
 
-  return { costoEnvio, totalConEnvio, ciudad, esGratis };
+  return { costoEnvio, descuento, totalConEnvio: totalFinal, ciudad, esGratis, esPrimera };
 }
 
 function abrirPasarelaPago() {
@@ -932,6 +981,7 @@ function procesarTransaccionPasarela(event) {
       esInvitado: esInvitado,
       items: resumen.items,
       subtotal: resumen.subtotal,
+      descuento: infoEnvio.descuento,
       costoEnvio: infoEnvio.costoEnvio,
       total: infoEnvio.totalConEnvio
     };
