@@ -80,7 +80,7 @@ const API_BASE_URL = `${CONFIG.API_URL}/auth`;
       }
     }
   }
-}
+
 
 function cargarBotonInicioSesion() {
   let btnInicio = document.getElementById("inicioSesion");
