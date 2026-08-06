@@ -1,6 +1,7 @@
 const API_BASE_URL = `${CONFIG.API_URL}/auth`;
-// function validarRutasAutorizadas() {
-//   let usuario = JSON.parse(sessionStorage.getItem("usuarioAutenticado")) || null;
+
+function validarRutasAutorizadas() {
+  let usuario = JSON.parse(sessionStorage.getItem("usuarioAutenticado")) || null;
 
   if (usuario) {
     let correoUsuario = document.getElementById("nombreUsuario");
@@ -348,7 +349,7 @@ function guardarPerfilUsuario(event) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
- // validarRutasAutorizadas();
+  validarRutasAutorizadas();
   cargarBotonInicioSesion();
   cargarRegisterForm();
   cargarloginForm();
