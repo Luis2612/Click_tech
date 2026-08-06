@@ -1,6 +1,6 @@
-function validarRutasAutorizadas() {
-  let usuario =
-    JSON.parse(sessionStorage.getItem("usuarioAutenticado")) || null;
+const API_BASE_URL = `${CONFIG.API_URL}/auth`;
+// function validarRutasAutorizadas() {
+//   let usuario = JSON.parse(sessionStorage.getItem("usuarioAutenticado")) || null;
 
   if (usuario) {
     let correoUsuario = document.getElementById("nombreUsuario");
@@ -68,8 +68,7 @@ function validarRutasAutorizadas() {
         "/html/contact/index.html",
         "/html/carrito/index.html",
       ];
-
-      if (!(sitiosPublicos.includes(window.location.pathname))){
+      if (!sitiosPublicos.includes(window.location.pathname)) {
         window.location.href = "../login/index.html";
       }
     } else {
@@ -82,123 +81,153 @@ function validarRutasAutorizadas() {
     }
   }
 }
+
 function cargarBotonInicioSesion() {
-  if (document.getElementById("inicioSesion") != undefined) {
-    document
-      .getElementById("inicioSesion")
-      .addEventListener("click", function (event) {
+  let btnInicio = document.getElementById("inicioSesion");
+  if (btnInicio) {
+    btnInicio.addEventListener("click", function (event) {
+      let usuario = sessionStorage.getItem("usuarioAutenticado");
+      if (usuario) {
         event.preventDefault();
         sessionStorage.removeItem("usuarioAutenticado");
         window.location.href = "../login/index.html";
-      });
+      }
+    });
   }
 }
+
 function cargarRegisterForm() {
-  if (document.getElementById("registerForm") != undefined) {
-    document
-      .getElementById("registerForm")
-      .addEventListener("submit", function (event) {
-        event.preventDefault();
-        if (this.checkValidity()) {
-          registrarUsuario();
-        } else {
-          event.stopPropagation();
-          this.classList.add("was-validated");
-        }
-      });
+  let registerForm = document.getElementById("registerForm");
+  if (registerForm) {
+    registerForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      if (this.checkValidity()) {
+        await registrarUsuario();
+      } else {
+        event.stopPropagation();
+        this.classList.add("was-validated");
+      }
+    });
   }
 }
 
 function cargarloginForm() {
-  if (document.getElementById("loginForm") != undefined) {
-    document
-      .getElementById("loginForm")
-      .addEventListener("submit", function (event) {
-        event.preventDefault();
-        if (this.checkValidity()) {
-          let email = document.getElementById("email").value;
-          let password = document.getElementById("password").value;
-          let usuario = autenticarse(email, password);
-          if (usuario) {
-            if (usuario.tipo == "administrador") {
-              crearToastContainer();
-              mostrarToastCarrito("Inicio sesión exitoso", "success");
-              setTimeout(() => {
-                window.location.href = "../admin/index.html";
-              }, 2000);
-            } else {
-              crearToastContainer();
-              mostrarToastCarrito("Inicio sesión exitoso", "success");
-              setTimeout(() => {
-                window.location.href = "../home/index.html";
-              }, 2000);
-            }
-          } else {
-            mostrarMensajeError("¡Error! usuario y contraseña invalido.");
+  let loginForm = document.getElementById("loginForm");
+  if (loginForm) {
+    loginForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      if (this.checkValidity()) {
+        let email = document.getElementById("email").value;
+        let password = document.getElementById("password").value;
+        let usuario = await autenticarse(email, password);
+        if (usuario) {
+          if (typeof crearToastContainer === "function") crearToastContainer();
+          if (typeof mostrarToastCarrito === "function") {
+            mostrarToastCarrito("Inicio sesión exitoso", "success");
           }
-        } else {
-          event.stopPropagation();
-          this.classList.add("was-validated");
+          setTimeout(() => {
+            if (usuario.tipo === "administrador") {
+              window.location.href = "../admin/index.html";
+            } else {
+              window.location.href = "../home/index.html";
+            }
+          }, 1500);
         }
-      });
+      } else {
+        event.stopPropagation();
+        this.classList.add("was-validated");
+      }
+    });
   }
 }
+
 function mostrarMensajeError(mensaje) {
   var contenedor = document.getElementById("contenedorErrores");
-  contenedor.innerHTML = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
-            ${mensaje}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-            `;
-}
-
-function autenticarse(email, password) {
-  let usuario = null;
-  let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
-  if (usuarios.length > 0) {
-    usuario = usuarios.find(
-      (user) => user.email === email && user.password === password,
-    );
-
-    if (usuario) {
-      sessionStorage.setItem("usuarioAutenticado", JSON.stringify(usuario));
-    }
+  if (contenedor) {
+    contenedor.innerHTML = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
+              ${mensaje}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>`;
   }
-  return usuario;
 }
 
-function registrarUsuario() {
-  let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+async function autenticarse(email, password) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, password })
+    });
 
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      const usuarioAutenticado = {
+        token: data.data.token,
+        nombre: data.data.nombre,
+        email: data.data.email,
+        rol: data.data.rol,
+        tipo: data.data.rol === 0 ? "administrador" : "usuario",
+        idUsuario: data.data.idUsuario
+      };
+      sessionStorage.setItem("usuarioAutenticado", JSON.stringify(usuarioAutenticado));
+      return usuarioAutenticado;
+    } else {
+      let mensajeError = data.message || "Credenciales inválidas.";
+      if (data.data && typeof data.data === "object") {
+        mensajeError = Object.values(data.data).join("<br>");
+      }
+      mostrarMensajeError(mensajeError);
+      return null;
+    }
+  } catch (error) {
+    mostrarMensajeError("No se pudo conectar con el servidor backend. Verifica que esté iniciado.");
+    return null;
+  }
+}
+
+async function registrarUsuario() {
   let nombre = document.getElementById("nombre").value;
-  let correo = document.getElementById("email").value;
+  let email = document.getElementById("email").value;
   let telefono = document.getElementById("telefono").value;
   let password = document.getElementById("password").value;
+  let confirmPassword = document.getElementById("confirmPassword") ? document.getElementById("confirmPassword").value : password;
 
-  let usuario = usuarios.find((user) => user.email === correo);
+  if (password !== confirmPassword) {
+    mostrarMensajeError("Las contraseñas no coinciden.");
+    return;
+  }
 
-  if (usuario) {
-    mostrarMensajeError("¡Error! El correo ya existe en el sistema.");
-  } else {
-    let tipo = "usuario";
-    if (correo.includes("clicktech.com")) {
-      tipo = "administrador";
+  try {
+    const response = await fetch(`${API_BASE_URL}/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ nombre, email, telefono, password })
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      if (typeof crearToastContainer === "function") crearToastContainer();
+      if (typeof mostrarToastCarrito === "function") {
+        mostrarToastCarrito("Usuario registrado exitosamente", "success");
+      }
+      setTimeout(() => {
+        window.location.href = "../login/index.html";
+      }, 1500);
+    } else {
+      let mensajeError = data.message || "Error al registrar usuario.";
+      if (data.data && typeof data.data === "object") {
+        mensajeError = Object.values(data.data).join("<br>");
+      }
+      mostrarMensajeError(mensajeError);
     }
-    let usuario = {
-      nombre: nombre,
-      email: correo,
-      telefono: telefono,
-      password: password,
-      tipo: tipo,
-    };
-
-    usuarios.push(usuario);
-    localStorage.setItem("usuarios", JSON.stringify(usuarios));
-    crearToastContainer();
-    mostrarToastCarrito("Usuario registrado exitosamente", "success");
-    setTimeout(() => {
-                    window.location.href = "../login/index.html";
-              }, 2000);
+  } catch (error) {
+    mostrarMensajeError("No se pudo conectar con el servidor backend. Verifica que esté iniciado.");
   }
 }
 
@@ -319,7 +348,7 @@ function guardarPerfilUsuario(event) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  validarRutasAutorizadas();
+ // validarRutasAutorizadas();
   cargarBotonInicioSesion();
   cargarRegisterForm();
   cargarloginForm();
