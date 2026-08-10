@@ -1,4 +1,4 @@
-let ADMIN_PRODUCTOS_CACHE = [];
+window.ADMIN_PRODUCTOS_CACHE = [];
 
 function obtenerAuthHeader() {
   const usuario = JSON.parse(sessionStorage.getItem("usuarioAutenticado") || "null");
@@ -22,7 +22,7 @@ async function obtenerProductosAdmin() {
     const res = await fetch(`${CONFIG.API_URL}/productos`);
     const data = await res.json();
     if (data.success && Array.isArray(data.data)) {
-      ADMIN_PRODUCTOS_CACHE = data.data.map(p => ({
+      window.ADMIN_PRODUCTOS_CACHE = data.data.map(p => ({
         id: p.idProducto || p.id,
         nombre: p.nombre,
         descripcion: p.descripcion,
@@ -32,12 +32,13 @@ async function obtenerProductosAdmin() {
         categoria: p.categoria ? (typeof p.categoria === "object" ? p.categoria.nombre : p.categoria) : "Accesorios",
         idCategoria: p.categoria && typeof p.categoria === "object" ? p.categoria.idCategorias : 5
       }));
-      return ADMIN_PRODUCTOS_CACHE;
+      return window.ADMIN_PRODUCTOS_CACHE;
     }
   } catch (e) {}
-  ADMIN_PRODUCTOS_CACHE = [];
+  window.ADMIN_PRODUCTOS_CACHE = [];
   return [];
 }
+
 
 function actualizarEstadisticas(todos) {
   const el = (id) => document.getElementById(id);
