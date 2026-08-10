@@ -1,5 +1,26 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const productos = _obtenerProductosDisponibles();
+async function _obtenerProductosBackend() {
+  try {
+    const res = await fetch(`${CONFIG.API_URL}/productos`);
+    const data = await res.json();
+    if (data.success && Array.isArray(data.data)) {
+      return data.data.map(p => ({
+        id: p.idProducto || p.id,
+        nombre: p.nombre,
+        descripcion: p.descripcion,
+        precio: Number(p.precio),
+        stock: p.stock,
+        imagen: p.imagen,
+        categoria: p.categoria ? (typeof p.categoria === "object" ? p.categoria.nombre : p.categoria) : "General"
+      }));
+    }
+    return [];
+  } catch (e) {
+    return [];
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const productos = await _obtenerProductosBackend();
   initPromoBanner();
   initPromoModal();
   initCarousel(productos);
@@ -9,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initCounters();
   initHeroFloat();
 });
+
 
 function initPromoModal() {
   const overlay = document.getElementById("promoModalOverlay");

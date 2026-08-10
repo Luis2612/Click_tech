@@ -1,88 +1,5 @@
 const API_BASE_URL = `${CONFIG.API_URL}/auth`;
 
-// function validarRutasAutorizadas() {
-//   let usuario = JSON.parse(sessionStorage.getItem("usuarioAutenticado")) || null;
-
-//   if (usuario) {
-//     let correoUsuario = document.getElementById("nombreUsuario");
-//     if (correoUsuario) {
-//       correoUsuario.innerHTML = "";
-//       correoUsuario.style.display = "none";
-//     }
-
-//     let linkInicioSesion = document.getElementById("inicioSesion");
-//     if (linkInicioSesion) {
-//       let parent = linkInicioSesion.closest(".d-flex.ms-lg-3") || linkInicioSesion.parentElement;
-//       let userBox = linkInicioSesion.parentElement;
-//       const nombreMostrar = usuario.nombre || usuario.email.split("@")[0];
-
-//       if (userBox) {
-//         userBox.innerHTML = `
-//           <div class="d-flex align-items-center gap-2 me-3">
-//             <button type="button" class="btn btn-outline-info rounded-pill px-3 py-1 text-white fw-bold d-inline-flex align-items-center gap-2 shadow-sm" onclick="abrirPerfilUsuario()">
-//               <i class="bi bi-person-circle text-color-resaltar fs-5"></i>
-//               <span class="small">${nombreMostrar}</span>
-//             </button>
-//             <button type="button" class="btn btn-outline-danger rounded-pill px-3 py-1 fw-bold small shadow-sm" onclick="cerrarSesionUsuario()" title="Cerrar Sesión">
-//               <i class="bi bi-box-arrow-right"></i> <span class="d-none d-md-inline">Salir</span>
-//             </button>
-//           </div>
-//         `;
-//       }
-//     }
-
-//     let enlacesRapidos = document.getElementById("enlacesRapidos");
-//     if (usuario.tipo == "administrador" && enlacesRapidos && !document.getElementById("linkAdminFooter")) {
-//       const linkAdministrador = document.createElement("li");
-//       linkAdministrador.id = "linkAdminFooter";
-//       linkAdministrador.innerHTML = `<a href="../admin/index.html" class="text-color-alternativo text-decoration-none">Consola Administrativa</a>`;
-//       enlacesRapidos.appendChild(linkAdministrador);
-//     }
-
-//     const navbarNav = document.querySelector(".navbar-nav");
-//     if (navbarNav && !document.getElementById("navPedidos")) {
-//       const li = document.createElement("li");
-//       li.className = "nav-item";
-//       const activeClass = window.location.pathname.includes("/pedidos/") ? " active" : "";
-//       li.innerHTML = `<a class="nav-link fw-bold${activeClass}" id="navPedidos" href="../pedidos/index.html"><i class="bi bi-box-seam me-1"></i>Mis Pedidos</a>`;
-//       navbarNav.appendChild(li);
-//     }
-//   }
-
-//   if (window.location.href.includes("/login/index.html")) {
-//     if (usuario != null) {
-//       if (usuario.tipo == "administrador") {
-//         window.location.href = "../admin/index.html";
-//       } else {
-//         window.location.href = "../home/index.html";
-//       }
-//     }
-//   } else {
-//     if (usuario == null) {
-//       const sitiosPublicos = [
-//         "/html/login/index.html",
-//         "/html/register/index.html",
-//         "/html/catalogo/index.html",
-//         "/html/catalogo/product.html",
-//         "/html/home/index.html",
-//         "/html/about/index.html",
-//         "/html/contact/index.html",
-//         "/html/carrito/index.html",
-//       ];
-//       if (!sitiosPublicos.includes(window.location.pathname)) {
-//         window.location.href = "../login/index.html";
-//       }
-//     } else {
-//       if (
-//         window.location.href.includes("/admin/index.html") &&
-//         usuario.tipo !== "administrador"
-//       ) {
-//         window.location.href = "../home/index.html";
-//       }
-//     }
-//   }
-
-
 function cargarBotonInicioSesion() {
   let btnInicio = document.getElementById("inicioSesion");
   if (btnInicio) {
@@ -349,8 +266,8 @@ function guardarPerfilUsuario(event) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  // validarRutasAutorizadas();
   cargarBotonInicioSesion();
   cargarRegisterForm();
   cargarloginForm();
 });
+

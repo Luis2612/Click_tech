@@ -7,22 +7,31 @@ let globalPrecioMax = 2000000;
 let filterPrecioMin = 0;
 let filterPrecioMax = 2000000;
 
-function obtenerProductosTienda() {
-  const nuevos = JSON.parse(localStorage.getItem("productos_nuevos") || "[]");
-  const eliminados = JSON.parse(localStorage.getItem("productos_eliminados") || "[]").map(id => Number(id));
-  const editados = JSON.parse(localStorage.getItem("productos_editados") || "{}");
-  const base = PRODUCTOS_INICIALES
-    .filter(p => !eliminados.includes(Number(p.id)))
-    .map(p => {
-      const idNum = Number(p.id);
-      return editados[idNum] ? editados[idNum] : (editados[p.id] ? editados[p.id] : p);
-    });
-  return [...base, ...nuevos];
+async function obtenerProductosTienda() {
+  try {
+    const res = await fetch(`${CONFIG.API_URL}/productos`);
+    const data = await res.json();
+    if (data.success && Array.isArray(data.data)) {
+      return data.data.map(p => ({
+        id: p.idProducto || p.id,
+        nombre: p.nombre,
+        descripcion: p.descripcion,
+        precio: Number(p.precio),
+        stock: p.stock,
+        imagen: p.imagen,
+        categoria: p.categoria ? (typeof p.categoria === "object" ? p.categoria.nombre : p.categoria) : "General"
+      }));
+    }
+    return [];
+  } catch (e) {
+    return [];
+  }
 }
 
 function initCatalogoFiltros(productos) {
   const container = document.getElementById("filterCategorias");
   if (!container) return;
+  container.innerHTML = "";
 
   const categorias = [...new Set(productos.map(p => p.categoria))].sort();
 
@@ -69,6 +78,7 @@ function initCatalogoFiltros(productos) {
 }
 
 function initPrecioSliders(productos) {
+  if (!productos || productos.length === 0) return;
   const precios = productos.map(p => p.precio);
   globalPrecioMin = Math.min(...precios);
   globalPrecioMax = Math.max(...precios);
@@ -126,7 +136,7 @@ function initBuscador() {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
       currentSearch = input.value.trim().toLowerCase();
-      clearBtn.classList.toggle("d-none", currentSearch === "");
+      if (clearBtn) clearBtn.classList.toggle("d-none", currentSearch === "");
       aplicarFiltros();
     }, 250);
   });
@@ -200,9 +210,12 @@ function initClearFilters() {
     if (sliderMax) { sliderMax.value = globalPrecioMax; filterPrecioMax = globalPrecioMax; }
     actualizarPrecioLabels();
 
-    document.getElementById("filterEnStock").checked = true;
-    document.getElementById("filterPocoStock").checked = true;
-    document.getElementById("filterAgotado").checked = false;
+    const enStock = document.getElementById("filterEnStock");
+    const pocoStock = document.getElementById("filterPocoStock");
+    const agotado = document.getElementById("filterAgotado");
+    if (enStock) enStock.checked = true;
+    if (pocoStock) pocoStock.checked = true;
+    if (agotado) agotado.checked = false;
 
     const sortSelect = document.getElementById("sortSelect");
     if (sortSelect) { sortSelect.value = "default"; currentSort = "default"; }
@@ -235,7 +248,7 @@ function getStockFilter() {
 }
 
 function aplicarFiltros() {
-  let productos = obtenerProductosTienda();
+  let productos = window.PRODUCTOS_CACHE || [];
   const cats = getSelectedCategories();
   const stock = getStockFilter();
 
@@ -341,11 +354,11 @@ function renderProductos(productos) {
 
   if (productos.length === 0) {
     contenedor.innerHTML = "";
-    sinProductos.classList.remove("d-none");
+    if (sinProductos) sinProductos.classList.remove("d-none");
     return;
   }
 
-  sinProductos.classList.add("d-none");
+  if (sinProductos) sinProductos.classList.add("d-none");
 
   if (currentView === "grid") {
     contenedor.className = "row g-4";
@@ -428,8 +441,9 @@ function crearTarjetaList(producto) {
   `;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const productos = obtenerProductosTienda();
+document.addEventListener("DOMContentLoaded", async () => {
+  const productos = await obtenerProductosTienda();
+  window.PRODUCTOS_CACHE = productos;
   initCatalogoFiltros(productos);
   initPrecioSliders(productos);
   initBuscador();

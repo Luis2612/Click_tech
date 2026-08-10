@@ -1,16 +1,26 @@
 const CARRITO_KEY = "carrito";
 
-function _obtenerProductosDisponibles() {
-  const nuevos = JSON.parse(localStorage.getItem("productos_nuevos") || "[]");
-  const eliminados = JSON.parse(localStorage.getItem("productos_eliminados") || "[]").map(id => Number(id));
-  const editados = JSON.parse(localStorage.getItem("productos_editados") || "{}");
-  const base = PRODUCTOS_INICIALES
-    .filter(p => !eliminados.includes(Number(p.id)))
-    .map(p => {
-      const idNum = Number(p.id);
-      return editados[idNum] ? editados[idNum] : (editados[p.id] ? editados[p.id] : p);
-    });
-  return [...base, ...nuevos];
+async function _obtenerProductosDisponibles() {
+  if (window.PRODUCTOS_CACHE && Array.isArray(window.PRODUCTOS_CACHE) && window.PRODUCTOS_CACHE.length > 0) {
+    return window.PRODUCTOS_CACHE;
+  }
+  try {
+    const res = await fetch(`${CONFIG.API_URL}/productos`);
+    const data = await res.json();
+    if (data.success && Array.isArray(data.data)) {
+      window.PRODUCTOS_CACHE = data.data.map(p => ({
+        id: p.idProducto || p.id,
+        nombre: p.nombre,
+        descripcion: p.descripcion,
+        precio: Number(p.precio),
+        stock: p.stock,
+        imagen: p.imagen,
+        categoria: p.categoria ? (typeof p.categoria === "object" ? p.categoria.nombre : p.categoria) : "General"
+      }));
+      return window.PRODUCTOS_CACHE;
+    }
+  } catch (e) {}
+  return [];
 }
 
 function obtenerCarrito() {
@@ -21,16 +31,16 @@ function guardarCarrito(carrito) {
   localStorage.setItem(CARRITO_KEY, JSON.stringify(carrito));
   actualizarBadgeCarrito();
   renderizarCarrito();
-  listarProductos();
+  if (typeof listarProductos === "function") listarProductos();
 }
 
-function agregarAlCarrito(productoId) {
-  const productos = _obtenerProductosDisponibles();
-  const producto = productos.find(p => p.id === productoId);
+async function agregarAlCarrito(productoId) {
+  const productos = await _obtenerProductosDisponibles();
+  const producto = productos.find(p => Number(p.id) === Number(productoId));
   if (!producto) return false;
 
   const carrito = obtenerCarrito();
-  const item = carrito.find(i => i.id === productoId);
+  const item = carrito.find(i => Number(i.id) === Number(productoId));
   const cantidadActual = item ? item.cantidad : 0;
 
   if (cantidadActual >= producto.stock) {
@@ -41,13 +51,14 @@ function agregarAlCarrito(productoId) {
   if (item) {
     item.cantidad += 1;
   } else {
-    carrito.push({ id: productoId, cantidad: 1 });
+    carrito.push({ id: Number(productoId), cantidad: 1 });
   }
 
   guardarCarrito(carrito);
   mostrarToastCarrito(`"${producto.nombre}" agregado al carrito`, "success");
   return true;
 }
+
 
 function eliminarDelCarrito(productoId) {
   let carrito = obtenerCarrito();
@@ -911,33 +922,21 @@ function formatearTarjetaLive() {
   if (cardExpDisplay) cardExpDisplay.textContent = expInput && expInput.value.trim().length > 0 ? expInput.value : "MM/YY";
 }
 
-function procesarTransaccionPasarela(event) {
+async function procesarTransaccionPasarela(event) {
   event.preventDefault();
 
   const usuario = JSON.parse(sessionStorage.getItem("usuarioAutenticado") || "null");
   const resumen = obtenerResumenCarrito();
   if (!resumen || resumen.items.length === 0) return;
 
-  let emailComprador = "";
-  let nombreComprador = "";
-  let esInvitado = false;
-
-  if (usuario) {
-    emailComprador = usuario.email;
-    nombreComprador = usuario.nombre;
-  } else {
-    esInvitado = true;
-    const inputNombre = document.getElementById("inputGuestNombre");
-    const inputEmail = document.getElementById("inputGuestEmail");
-
-    if (!inputNombre || !inputNombre.value.trim() || !inputEmail || !inputEmail.value.trim()) {
-      if (typeof mostrarToastCarrito === "function") {
-        mostrarToastCarrito("Por favor ingresa tu nombre y correo para continuar", "warning");
-      }
-      return;
+  if (!usuario) {
+    if (typeof mostrarToastCarrito === "function") {
+      mostrarToastCarrito("Por favor inicia sesión para continuar con el pago", "warning");
     }
-    nombreComprador = inputNombre.value.trim();
-    emailComprador = inputEmail.value.trim().toLowerCase();
+    setTimeout(() => {
+      window.location.href = "../login/index.html";
+    }, 1500);
+    return;
   }
 
   const infoEnvio = calcularEnvioPasarelaLive();
@@ -963,83 +962,84 @@ function procesarTransaccionPasarela(event) {
         <span class="visually-hidden">Cargando...</span>
       </div>
       <h4 class="fw-bold text-color-principal mb-2">Procesando transacción segura...</h4>
-      <p class="text-color-alternativo small">Conectando con la pasarela de pago de Click Techs. No cierres la ventana.</p>
+      <p class="text-color-alternativo small">Conectando con la pasarela de pago. No cierres la ventana.</p>
     </div>
   `;
 
-  setTimeout(() => {
-    const numAleatorio = Math.floor(100000 + Math.random() * 900000);
-    const nuevoPedido = {
-      id: `CT-${numAleatorio}`,
-      fecha: new Date().toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }),
-      timestamp: Date.now(),
-      estado: "en-proceso",
-      paso: 2,
-      pasoTexto: "En preparación por el equipo de almacén",
-      transportadora: "Servientrega",
-      guia: `CT-TRK-${numAleatorio}`,
-      direccion: direccionCompleta,
-      metodoPago: nombreMetodo,
-      compradorNombre: nombreComprador,
-      compradorEmail: emailComprador,
-      esInvitado: esInvitado,
-      items: resumen.items,
-      subtotal: resumen.subtotal,
-      descuento: infoEnvio.descuento,
-      costoEnvio: infoEnvio.costoEnvio,
-      total: infoEnvio.totalConEnvio
-    };
+  const payload = {
+    idUsuario: usuario.idUsuario,
+    direccion: direccionCompleta,
+    total: infoEnvio.totalConEnvio,
+    metodoPago: nombreMetodo,
+    detalles: resumen.items.map(item => ({
+      idProducto: Number(item.id),
+      cantidad: Number(item.cantidad),
+      precioUnitario: Number(item.precio),
+      subtotal: Number(item.totalItem)
+    }))
+  };
 
-    const keyPedidos = `pedidos_${emailComprador}`;
-    let pedidos = JSON.parse(localStorage.getItem(keyPedidos) || "[]");
-    pedidos.unshift(nuevoPedido);
-    localStorage.setItem(keyPedidos, JSON.stringify(pedidos));
+  try {
+    const response = await fetch(`${CONFIG.API_URL}/pedidos`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${usuario.token}`
+      },
+      body: JSON.stringify(payload)
+    });
 
-    let ultimosInvitado = JSON.parse(localStorage.getItem("pedidos_invitado_ultimos") || "[]");
-    ultimosInvitado.unshift(nuevoPedido);
-    localStorage.setItem("pedidos_invitado_ultimos", JSON.stringify(ultimosInvitado));
+    const data = await response.json();
 
-    vaciarCarrito();
+    if (response.ok && data.success) {
+      vaciarCarrito();
+      bodyContent.innerHTML = `
+        <div class="p-5 text-center my-4">
+          <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-25 text-success rounded-circle mb-3 p-3" style="width: 80px; height: 80px;">
+            <i class="bi bi-check-circle-fill display-4"></i>
+          </div>
+          <h3 class="fw-bold text-color-principal mb-2">¡Pago Aprobado con Éxito!</h3>
+          <p class="text-color-alternativo mb-2">Tu pedido <strong>#${data.data?.id || 'CT-' + Math.floor(100000 + Math.random() * 900000)}</strong> ha sido registrado en el sistema.</p>
+          <span class="badge bg-success px-4 py-2 fs-6 rounded-pill mb-3">Aprobado</span>
+        </div>
+      `;
 
-    let ctaGuestHTML = "";
-    if (esInvitado) {
-      ctaGuestHTML = `
-        <div class="mt-4 p-3 bg-secundario rounded-3 border border-secondary text-start" style="max-width: 480px; margin: 0 auto;">
-          <h6 class="fw-bold text-color-principal mb-1"><i class="bi bi-star-fill text-warning me-2"></i>¿Quieres hacer seguimiento a tu pedido?</h6>
-          <p class="small text-color-alternativo mb-3">Crea tu cuenta con el correo <strong>${emailComprador}</strong> y tu pedido aparecerá automáticamente en tu historial de Mis Pedidos.</p>
-          <a href="../register/index.html" class="btn btn-outline-info rounded-pill btn-sm w-100 fw-bold">
-            <i class="bi bi-person-plus-fill me-1"></i>Crear cuenta gratis ahora
-          </a>
+      setTimeout(() => {
+        const modalEl = document.getElementById("modalPasarelaPago");
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+        window.location.href = "../pedidos/index.html";
+      }, 2500);
+    } else {
+      let mensajeError = data.message || "Error al procesar el pago.";
+      if (data.data && typeof data.data === "object") {
+        mensajeError = Object.values(data.data).join("<br>");
+      }
+      bodyContent.innerHTML = `
+        <div class="p-5 text-center my-4">
+          <div class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-25 text-danger rounded-circle mb-3 p-3" style="width: 80px; height: 80px;">
+            <i class="bi bi-exclamation-triangle-fill display-4"></i>
+          </div>
+          <h4 class="fw-bold text-color-principal mb-2">Transacción Rechazada</h4>
+          <p class="text-color-alternativo small mb-4">${mensajeError}</p>
+          <button class="btn btn-outline-info rounded-pill px-4" onclick="abrirPasarelaPago()">Intentar de nuevo</button>
         </div>
       `;
     }
-
+  } catch (error) {
     bodyContent.innerHTML = `
       <div class="p-5 text-center my-4">
-        <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-25 text-success rounded-circle mb-3 p-3" style="width: 80px; height: 80px;">
-          <i class="bi bi-check-circle-fill display-4"></i>
+        <div class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-25 text-danger rounded-circle mb-3 p-3" style="width: 80px; height: 80px;">
+          <i class="bi bi-wifi-off display-4"></i>
         </div>
-        <h3 class="fw-bold text-color-principal mb-2">¡Pago Aprobado con Éxito!</h3>
-        <p class="text-color-alternativo mb-2">Tu pedido <strong>#${nuevoPedido.id}</strong> a nombre de <strong>${nombreComprador}</strong> ha sido registrado.</p>
-        <span class="badge bg-success px-4 py-2 fs-6 rounded-pill mb-3">Aprobado #PAS-${Math.floor(100000 + Math.random() * 900000)}</span>
-        ${ctaGuestHTML}
+        <h4 class="fw-bold text-color-principal mb-2">Error de conexión</h4>
+        <p class="text-color-alternativo small mb-4">No fue posible conectar con el servidor backend.</p>
+        <button class="btn btn-outline-info rounded-pill px-4" onclick="abrirPasarelaPago()">Intentar de nuevo</button>
       </div>
     `;
-
-    setTimeout(() => {
-      const modalEl = document.getElementById("modalPasarelaPago");
-      const modal = bootstrap.Modal.getInstance(modalEl);
-      if (modal) modal.hide();
-      if (usuario) {
-        window.location.href = "../pedidos/index.html";
-      } else {
-        if (typeof mostrarToastCarrito === "function") {
-          mostrarToastCarrito("¡Pedido realizado con éxito como invitado!", "success");
-        }
-      }
-    }, 3500);
-  }, 2200);
+  }
 }
+
 
 function _rutaCatalogo() {
   if (window.location.pathname.includes("/catalogo/")) return "#";

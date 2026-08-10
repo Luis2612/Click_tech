@@ -1,26 +1,45 @@
-function obtenerProductos() {
-  const nuevos = JSON.parse(localStorage.getItem("productos_nuevos") || "[]");
-  const eliminados = JSON.parse(localStorage.getItem("productos_eliminados") || "[]").map(id => Number(id));
-  const editados = JSON.parse(localStorage.getItem("productos_editados") || "{}");
+let ADMIN_PRODUCTOS_CACHE = [];
 
-  const base = PRODUCTOS_INICIALES
-    .filter(p => !eliminados.includes(Number(p.id)))
-    .map(p => {
-      const idNum = Number(p.id);
-      return editados[idNum] ? editados[idNum] : (editados[p.id] ? editados[p.id] : p);
-    });
-
-  return [...base, ...nuevos];
+function obtenerAuthHeader() {
+  const usuario = JSON.parse(sessionStorage.getItem("usuarioAutenticado") || "null");
+  if (!usuario || !usuario.token) return {};
+  return { "Authorization": `Bearer ${usuario.token}` };
 }
 
-function generarId() {
-  const todos = obtenerProductos();
-  if (todos.length === 0) return 100;
-  return Math.max(...todos.map(p => p.id)) + 1;
+function mapearCategoriaAId(categoriaStr) {
+  if (!categoriaStr) return 5;
+  if (!isNaN(categoriaStr)) return Number(categoriaStr);
+  const cat = String(categoriaStr).toLowerCase().trim();
+  if (cat.includes("teclado")) return 1;
+  if (cat.includes("mouse") || cat.includes("raton")) return 2;
+  if (cat.includes("monitor") || cat.includes("pantalla")) return 3;
+  if (cat.includes("audio") || cat.includes("audifono") || cat.includes("parlante")) return 4;
+  return 5;
 }
 
-function actualizarEstadisticas() {
-  const todos = obtenerProductos();
+async function obtenerProductosAdmin() {
+  try {
+    const res = await fetch(`${CONFIG.API_URL}/productos`);
+    const data = await res.json();
+    if (data.success && Array.isArray(data.data)) {
+      ADMIN_PRODUCTOS_CACHE = data.data.map(p => ({
+        id: p.idProducto || p.id,
+        nombre: p.nombre,
+        descripcion: p.descripcion,
+        precio: Number(p.precio),
+        stock: p.stock,
+        imagen: p.imagen,
+        categoria: p.categoria ? (typeof p.categoria === "object" ? p.categoria.nombre : p.categoria) : "Accesorios",
+        idCategoria: p.categoria && typeof p.categoria === "object" ? p.categoria.idCategorias : 5
+      }));
+      return ADMIN_PRODUCTOS_CACHE;
+    }
+  } catch (e) {}
+  ADMIN_PRODUCTOS_CACHE = [];
+  return [];
+}
+
+function actualizarEstadisticas(todos) {
   const el = (id) => document.getElementById(id);
   if (el("contadorProductos")) el("contadorProductos").textContent = todos.length;
   if (el("contadorCategorias")) el("contadorCategorias").textContent = [...new Set(todos.map(p => p.categoria))].length;
@@ -28,9 +47,9 @@ function actualizarEstadisticas() {
   if (el("contadorStockBajo")) el("contadorStockBajo").textContent = todos.filter(p => p.stock <= 10).length;
 }
 
-function listarProductos(filtro = "") {
-  let productos = obtenerProductos();
-  actualizarEstadisticas();
+async function listarProductos(filtro = "") {
+  let productos = await obtenerProductosAdmin();
+  actualizarEstadisticas(productos);
 
   if (filtro.trim() !== "") {
     const texto = filtro.toLowerCase();
@@ -42,6 +61,7 @@ function listarProductos(filtro = "") {
   }
 
   const tbody = document.getElementById("tablaProductos");
+  if (!tbody) return;
 
   if (productos.length === 0) {
     tbody.innerHTML = `
@@ -67,7 +87,7 @@ function listarProductos(filtro = "") {
       </td>
       <td>
         <div class="fw-semibold text-color-principal">${p.nombre}</div>
-        <small class="text-color-alternativo">${p.descripcion.length > 60 ? p.descripcion.substring(0, 60) + "..." : p.descripcion}</small>
+        <small class="text-color-alternativo">${p.descripcion && p.descripcion.length > 60 ? p.descripcion.substring(0, 60) + "..." : (p.descripcion || "")}</small>
       </td>
       <td><span class="badge bg-primary bg-opacity-25 text-primary">${p.categoria}</span></td>
       <td class="fw-semibold text-color-principal">$${p.precio.toLocaleString("es-CO")}</td>
@@ -88,106 +108,95 @@ function listarProductos(filtro = "") {
     </tr>
   `).join("");
 }
-function agregarProducto(datos) {
-  const nuevos = JSON.parse(localStorage.getItem("productos_nuevos") || "[]");
 
-  const nuevoProducto = {
-    id: generarId(),
+async function agregarProducto(datos) {
+  const payload = {
     nombre: datos.nombre.trim(),
     descripcion: datos.descripcion.trim(),
-    precio: parseInt(datos.precio),
-    categoria: datos.categoria.trim(),
-    stock: parseInt(datos.stock),
-    imagen: datos.imagen || ""
+    precio: Number(datos.precio),
+    stock: Number(datos.stock),
+    imagen: datos.imagen || "",
+    idCategoria: mapearCategoriaAId(datos.categoria)
   };
 
-  nuevos.push(nuevoProducto);
-  localStorage.setItem("productos_nuevos", JSON.stringify(nuevos));
-  listarProductos();
-  mostrarToast("Producto agregado exitosamente", "success");
-  return nuevoProducto;
-}
-function editarProducto(id, datos) {
-  const idNum = Number(id);
-  const esBase = PRODUCTOS_INICIALES.some(p => Number(p.id) === idNum);
-
-  const productoActualizado = {
-    id: idNum,
-    nombre: datos.nombre.trim(),
-    descripcion: datos.descripcion.trim(),
-    precio: parseInt(datos.precio),
-    categoria: datos.categoria.trim(),
-    stock: parseInt(datos.stock),
-    imagen: datos.imagen
-  };
-
-  if (esBase) {
-    const editados = JSON.parse(localStorage.getItem("productos_editados") || "{}");
-    if (!datos.imagen) {
-      const original = PRODUCTOS_INICIALES.find(p => Number(p.id) === idNum);
-      productoActualizado.imagen = editados[idNum]?.imagen || editados[String(idNum)]?.imagen || original?.imagen || "";
+  try {
+    const res = await fetch(`${CONFIG.API_URL}/productos`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...obtenerAuthHeader()
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      await listarProductos();
+      mostrarToast("Producto agregado exitosamente", "success");
+      return data.data;
+    } else {
+      mostrarToast(data.message || "Error al agregar el producto", "danger");
     }
-    editados[idNum] = productoActualizado;
-    localStorage.setItem("productos_editados", JSON.stringify(editados));
-  } else {
-    const nuevos = JSON.parse(localStorage.getItem("productos_nuevos") || "[]");
-    const index = nuevos.findIndex(p => Number(p.id) === idNum);
-    if (index !== -1) {
-      if (!datos.imagen) {
-        productoActualizado.imagen = nuevos[index].imagen || "";
+  } catch (e) {
+    mostrarToast("Error de conexión al agregar producto", "danger");
+  }
+  return null;
+}
+
+async function editarProducto(id, datos) {
+  const payload = {
+    nombre: datos.nombre.trim(),
+    descripcion: datos.descripcion.trim(),
+    precio: Number(datos.precio),
+    stock: Number(datos.stock),
+    imagen: datos.imagen || "",
+    idCategoria: mapearCategoriaAId(datos.categoria)
+  };
+
+  try {
+    const res = await fetch(`${CONFIG.API_URL}/productos/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        ...obtenerAuthHeader()
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      await listarProductos();
+      mostrarToast("Producto actualizado exitosamente", "info");
+      return data.data;
+    } else {
+      mostrarToast(data.message || "Error al actualizar el producto", "danger");
+    }
+  } catch (e) {
+    mostrarToast("Error de conexión al actualizar producto", "danger");
+  }
+  return null;
+}
+
+async function eliminarProducto(id) {
+  try {
+    const res = await fetch(`${CONFIG.API_URL}/productos/${id}`, {
+      method: "DELETE",
+      headers: {
+        ...obtenerAuthHeader()
       }
-      nuevos[index] = productoActualizado;
-      localStorage.setItem("productos_nuevos", JSON.stringify(nuevos));
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      await listarProductos();
+      mostrarToast("Producto eliminado correctamente", "warning");
+      return true;
+    } else {
+      mostrarToast(data.message || "Error al eliminar el producto", "danger");
     }
+  } catch (e) {
+    mostrarToast("Error de conexión al eliminar producto", "danger");
   }
-
-  listarProductos();
-  mostrarToast("Producto actualizado exitosamente", "info");
-  return productoActualizado;
+  return false;
 }
-function eliminarProducto(id) {
-  const idNum = Number(id);
-  const productos = obtenerProductos();
-  const producto = productos.find(p => Number(p.id) === idNum);
-  if (!producto) {
-    mostrarToast("Producto no encontrado", "danger");
-    return false;
-  }
 
-  const esBase = PRODUCTOS_INICIALES.some(p => Number(p.id) === idNum);
-
-  if (esBase) {
-    let eliminados = JSON.parse(localStorage.getItem("productos_eliminados") || "[]").map(x => Number(x));
-    if (!eliminados.includes(idNum)) {
-      eliminados.push(idNum);
-    }
-    localStorage.setItem("productos_eliminados", JSON.stringify(eliminados));
-
-    const editados = JSON.parse(localStorage.getItem("productos_editados") || "{}");
-    delete editados[idNum];
-    delete editados[String(idNum)];
-    localStorage.setItem("productos_editados", JSON.stringify(editados));
-  } else {
-    let nuevos = JSON.parse(localStorage.getItem("productos_nuevos") || "[]");
-    nuevos = nuevos.filter(p => Number(p.id) !== idNum);
-    localStorage.setItem("productos_nuevos", JSON.stringify(nuevos));
-
-    const editados = JSON.parse(localStorage.getItem("productos_editados") || "{}");
-    delete editados[idNum];
-    delete editados[String(idNum)];
-    localStorage.setItem("productos_editados", JSON.stringify(editados));
-  }
-
-  let carrito = JSON.parse(localStorage.getItem("carrito") || "[]");
-  const carritoFiltrado = carrito.filter(item => Number(item.id) !== idNum);
-  if (carrito.length !== carritoFiltrado.length) {
-    localStorage.setItem("carrito", JSON.stringify(carritoFiltrado));
-  }
-
-  listarProductos();
-  mostrarToast(`"${producto.nombre}" eliminado correctamente`, "warning");
-  return true;
-}
 document.addEventListener("DOMContentLoaded", () => {
   listarProductos();
 

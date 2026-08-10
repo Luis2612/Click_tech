@@ -1,4 +1,6 @@
 let imagenBase64Temp = "";
+let productoEditandoId = null;
+let idAEliminar = null;
 
 function previsualizarImagen(event) {
   const archivo = event.target.files[0];
@@ -37,7 +39,6 @@ function quitarImagen() {
   document.getElementById("inputImagen").value = "";
   document.getElementById("previewContainer").classList.add("d-none");
 }
-let productoEditandoId = null;
 
 function abrirAgregar() {
   productoEditandoId = null;
@@ -51,8 +52,8 @@ function abrirAgregar() {
 }
 
 function abrirEditar(id) {
-  const productos = obtenerProductos();
-  const producto = productos.find(p => p.id === id);
+  const productos = window.ADMIN_PRODUCTOS_CACHE || [];
+  const producto = productos.find(p => Number(p.id) === Number(id));
   if (!producto) return;
 
   productoEditandoId = id;
@@ -80,7 +81,7 @@ function abrirEditar(id) {
   modal.show();
 }
 
-function guardarDesdeFormulario() {
+async function guardarDesdeFormulario() {
   const form = document.getElementById("formProducto");
 
   if (!form.checkValidity()) {
@@ -98,21 +99,20 @@ function guardarDesdeFormulario() {
   };
 
   if (productoEditandoId) {
-    editarProducto(productoEditandoId, datos);
+    await editarProducto(productoEditandoId, datos);
   } else {
-    agregarProducto(datos);
+    await agregarProducto(datos);
   }
 
   const modal = bootstrap.Modal.getInstance(document.getElementById("modalProducto"));
-  modal.hide();
+  if (modal) modal.hide();
   form.classList.remove("was-validated");
   imagenBase64Temp = "";
 }
-let idAEliminar = null;
 
 function confirmarEliminar(id) {
-  const productos = obtenerProductos();
-  const producto = productos.find(p => p.id === id);
+  const productos = window.ADMIN_PRODUCTOS_CACHE || [];
+  const producto = productos.find(p => Number(p.id) === Number(id));
   if (!producto) return;
 
   idAEliminar = id;
@@ -121,16 +121,18 @@ function confirmarEliminar(id) {
   modal.show();
 }
 
-function ejecutarEliminar() {
+async function ejecutarEliminar() {
   if (idAEliminar !== null) {
-    eliminarProducto(idAEliminar);
+    await eliminarProducto(idAEliminar);
     idAEliminar = null;
     const modal = bootstrap.Modal.getInstance(document.getElementById("modalEliminar"));
-    modal.hide();
+    if (modal) modal.hide();
   }
 }
+
 function mostrarToast(mensaje, tipo = "success") {
   const contenedor = document.getElementById("toastContenedor");
+  if (!contenedor) return;
   const iconos = {
     success: "check-circle-fill",
     danger: "exclamation-triangle-fill",

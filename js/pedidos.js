@@ -1,120 +1,56 @@
 let estadoFiltroActual = "todos";
+let PEDIDOS_CACHE = [];
 
 function obtenerUsuarioAutenticado() {
   return JSON.parse(sessionStorage.getItem("usuarioAutenticado") || "null");
 }
 
-function generarEjemplosDeDataLocal() {
-  const prods = (typeof _obtenerProductosDisponibles === "function") 
-    ? _obtenerProductosDisponibles() 
-    : (typeof PRODUCTOS_INICIALES !== "undefined" ? PRODUCTOS_INICIALES : []);
-
-  if (!prods || prods.length === 0) return [];
-
-  const getProd = (id) => prods.find(p => p.id === id) || prods[0];
-
-  const p1 = getProd(1);
-  const p7 = getProd(7);
-  const p3 = getProd(3);
-  const p4 = getProd(4);
-  const p2 = getProd(2);
-  const p6 = getProd(6);
-
-  return [
-    {
-      id: "CT-948102",
-      fecha: "Hoy, 10:30 AM",
-      timestamp: Date.now() - 7200000,
-      estado: "en-proceso",
-      paso: 2,
-      pasoTexto: "En preparación por el equipo Click Techs",
-      transportadora: "Servientrega",
-      guia: "CT-TRK-948102",
-      direccion: "Av. El Dorado #68-90, Apt 502, Bogotá D.C.",
-      metodoPago: "Tarjeta de Crédito (Visa *4321)",
-      total: (p1 ? p1.precio : 289900) + (p7 ? p7.precio : 129900),
-      items: [
-        { ...p1, cantidad: 1, totalItem: p1 ? p1.precio : 289900 },
-        { ...p7, cantidad: 1, totalItem: p7 ? p7.precio : 129900 }
-      ]
-    },
-    {
-      id: "CT-882319",
-      fecha: "Ayer, 03:45 PM",
-      timestamp: Date.now() - 86400000,
-      estado: "en-entrega",
-      paso: 3,
-      pasoTexto: "En camino a tu domicilio con repartidor",
-      transportadora: "Interrapidísimo",
-      guia: "INT-882319-COL",
-      direccion: "Av. El Dorado #68-90, Apt 502, Bogotá D.C.",
-      metodoPago: "PSE - Bancolombia",
-      total: (p3 ? p3.precio : 1149900) + (p4 ? p4.precio : 349900),
-      items: [
-        { ...p3, cantidad: 1, totalItem: p3 ? p3.precio : 1149900 },
-        { ...p4, cantidad: 1, totalItem: p4 ? p4.precio : 349900 }
-      ]
-    },
-    {
-      id: "CT-721094",
-      fecha: "18 de Julio, 2026",
-      timestamp: Date.now() - 1500000000,
-      estado: "entregado",
-      paso: 4,
-      pasoTexto: "Entregado el 20 de Julio, 2026",
-      transportadora: "Servientrega",
-      guia: "CT-TRK-721094",
-      direccion: "Av. El Dorado #68-90, Apt 502, Bogotá D.C.",
-      metodoPago: "Tarjeta de Crédito (Mastercard *9876)",
-      total: p2 ? p2.precio : 179900,
-      items: [
-        { ...p2, cantidad: 1, totalItem: p2 ? p2.precio : 179900 }
-      ]
-    },
-    {
-      id: "CT-615022",
-      fecha: "02 de Junio, 2026",
-      timestamp: Date.now() - 5000000000,
-      estado: "entregado",
-      paso: 4,
-      pasoTexto: "Entregado el 05 de Junio, 2026",
-      transportadora: "Coordinadora",
-      guia: "COO-615022-BO",
-      direccion: "Av. El Dorado #68-90, Apt 502, Bogotá D.C.",
-      metodoPago: "Nequi",
-      total: p6 ? p6.precio : 419900,
-      items: [
-        { ...p6, cantidad: 1, totalItem: p6 ? p6.precio : 419900 }
-      ]
-    }
-  ];
-}
-
-function obtenerPedidos() {
+async function obtenerPedidosBackend() {
   const usuario = obtenerUsuarioAutenticado();
   if (!usuario) return [];
-
-  const keyPedidos = `pedidos_${usuario.email}`;
-  let pedidosGuardados = localStorage.getItem(keyPedidos);
-
-  if (!pedidosGuardados) {
-    const ejemplosIniciales = generarEjemplosDeDataLocal();
-    localStorage.setItem(keyPedidos, JSON.stringify(ejemplosIniciales));
-    return ejemplosIniciales;
-  }
-
   try {
-    let list = JSON.parse(pedidosGuardados);
-    if (!Array.isArray(list) || list.some(p => !p.items || p.items.some(item => !item || !item.nombre))) {
-      const ejemplosIniciales = generarEjemplosDeDataLocal();
-      localStorage.setItem(keyPedidos, JSON.stringify(ejemplosIniciales));
-      return ejemplosIniciales;
+    const res = await fetch(`${CONFIG.API_URL}/pedidos/usuario/${usuario.idUsuario}`, {
+      headers: {
+        "Authorization": `Bearer ${usuario.token}`
+      }
+    });
+    const data = await res.json();
+    if (data.success && Array.isArray(data.data)) {
+      const productosMap = {};
+      if (typeof _obtenerProductosBackend === "function") {
+        const prods = await _obtenerProductosBackend();
+        prods.forEach(p => { productosMap[p.id] = p; });
+      }
+      return data.data.map(p => ({
+        id: `CT-${p.id}`,
+        rawId: p.id,
+        fecha: p.fecha ? new Date(p.fecha).toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Fecha N/A",
+        timestamp: p.fecha ? new Date(p.fecha).getTime() : Date.now(),
+        estado: "en-proceso",
+        paso: 2,
+        pasoTexto: "En preparación por el equipo de almacén",
+        transportadora: "Servientrega",
+        guia: `CT-TRK-${p.id}`,
+        direccion: p.direccion,
+        metodoPago: p.metodoPago || "Tarjeta de Crédito",
+        total: Number(p.total),
+        items: (p.detallePedidoResponseList || []).map(d => {
+          const prod = productosMap[d.productoId] || {};
+          return {
+            id: d.productoId,
+            nombre: prod.nombre || `Producto #${d.productoId}`,
+            categoria: prod.categoria || "Periféricos",
+            imagen: prod.imagen || "",
+            cantidad: d.cantidad,
+            precio: Number(d.precioUnitario),
+            totalItem: Number(d.subtotal)
+          };
+        })
+      }));
     }
-    return list;
+    return [];
   } catch (e) {
-    const ejemplosIniciales = generarEjemplosDeDataLocal();
-    localStorage.setItem(keyPedidos, JSON.stringify(ejemplosIniciales));
-    return ejemplosIniciales;
+    return [];
   }
 }
 
@@ -124,15 +60,25 @@ function renderizarEstadisticas(pedidos) {
   const enEntrega = pedidos.filter(p => p.estado === "en-entrega").length;
   const entregados = pedidos.filter(p => p.estado === "entregado").length;
 
-  document.getElementById("statTotal").textContent = total;
-  document.getElementById("statProceso").textContent = enProceso;
-  document.getElementById("statEntrega").textContent = enEntrega;
-  document.getElementById("statEntregados").textContent = entregados;
+  const statTotal = document.getElementById("statTotal");
+  const statProceso = document.getElementById("statProceso");
+  const statEntrega = document.getElementById("statEntrega");
+  const statEntregados = document.getElementById("statEntregados");
 
-  document.getElementById("countTabTodos").textContent = total;
-  document.getElementById("countTabProceso").textContent = enProceso;
-  document.getElementById("countTabEntrega").textContent = enEntrega;
-  document.getElementById("countTabHistorial").textContent = entregados;
+  if (statTotal) statTotal.textContent = total;
+  if (statProceso) statProceso.textContent = enProceso;
+  if (statEntrega) statEntrega.textContent = enEntrega;
+  if (statEntregados) statEntregados.textContent = entregados;
+
+  const countTabTodos = document.getElementById("countTabTodos");
+  const countTabProceso = document.getElementById("countTabProceso");
+  const countTabEntrega = document.getElementById("countTabEntrega");
+  const countTabHistorial = document.getElementById("countTabHistorial");
+
+  if (countTabTodos) countTabTodos.textContent = total;
+  if (countTabProceso) countTabProceso.textContent = enProceso;
+  if (countTabEntrega) countTabEntrega.textContent = enEntrega;
+  if (countTabHistorial) countTabHistorial.textContent = entregados;
 }
 
 function obtenerBadgeEstado(estado) {
@@ -198,144 +144,116 @@ function crearTarjetaPedido(pedido) {
           <h6 class="pedido-item-name">${item.nombre}</h6>
           <span class="pedido-item-qty">Cantidad: ${item.cantidad} x $${item.precio.toLocaleString("es-CO")}</span>
         </div>
-        <div class="pedido-item-price">$${(item.precio * item.cantidad).toLocaleString("es-CO")}</div>
+        <span class="pedido-item-price">$${item.totalItem.toLocaleString("es-CO")}</span>
       </div>
     `;
   }).join("");
 
   return `
-    <div class="card-pedido" id="pedido-${pedido.id}">
+    <div class="card card-pedido mb-4">
       <div class="card-pedido-header">
-        <div class="d-flex align-items-center gap-3 flex-wrap">
-          <div>
-            <span class="card-pedido-id">Pedido ${pedido.id}</span>
-            <div class="card-pedido-date"><i class="bi bi-calendar3 me-1"></i>Realizado el ${pedido.fecha}</div>
+        <div>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <h5 class="pedido-id mb-0">${pedido.id}</h5>
+            ${badge}
           </div>
-          ${badge}
+          <span class="pedido-date"><i class="bi bi-calendar3 me-1"></i>${pedido.fecha}</span>
         </div>
-        <div class="card-pedido-total-wrap text-end">
-          <span class="card-pedido-total-label">Total pagado</span>
-          <span class="card-pedido-total-val">$${pedido.total.toLocaleString("es-CO")}</span>
+        <div class="text-end">
+          <span class="pedido-total-label">Total del Pedido</span>
+          <div class="pedido-total-val">$${pedido.total.toLocaleString("es-CO")}</div>
         </div>
       </div>
 
       <div class="card-pedido-body">
         ${tracker}
-        <div class="pedido-status-banner">
-          <i class="bi bi-info-circle me-2"></i><strong>Estado actual:</strong> ${pedido.pasoTexto}
-        </div>
 
-        <div class="pedido-items-container mt-3">
+        <div class="pedido-items-list mt-4">
           ${itemsHTML}
         </div>
 
-        <div class="pedido-details-collapse collapse" id="detalles-${pedido.id}">
-          <div class="pedido-extra-info">
-            <div class="row g-3">
-              <div class="col-md-4">
-                <span class="extra-info-label"><i class="bi bi-geo-alt me-1"></i> Dirección de envío</span>
-                <p class="extra-info-val">${pedido.direccion}</p>
-              </div>
-              <div class="col-md-4">
-                <span class="extra-info-label"><i class="bi bi-credit-card me-1"></i> Método de pago</span>
-                <p class="extra-info-val">${pedido.metodoPago}</p>
-              </div>
-              <div class="col-md-4">
-                <span class="extra-info-label"><i class="bi bi-truck me-1"></i> Transporte & Guía</span>
-                <p class="extra-info-val">${pedido.transportadora} - <code>${pedido.guia}</code></p>
-              </div>
-            </div>
+        <div class="pedido-details-grid mt-3 pt-3 border-top border-secondary">
+          <div>
+            <span class="detail-label"><i class="bi bi-geo-alt me-1"></i>Dirección de Envío</span>
+            <p class="detail-val">${pedido.direccion}</p>
+          </div>
+          <div>
+            <span class="detail-label"><i class="bi bi-credit-card me-1"></i>Método de Pago</span>
+            <p class="detail-val">${pedido.metodoPago}</p>
+          </div>
+          <div>
+            <span class="detail-label"><i class="bi bi-truck me-1"></i>Transportadora</span>
+            <p class="detail-val">${pedido.transportadora} (${pedido.guia})</p>
           </div>
         </div>
       </div>
 
       <div class="card-pedido-footer">
-        <button class="btn-pedido-action btn-outline-custom" type="button" data-bs-toggle="collapse" data-bs-target="#detalles-${pedido.id}">
-          <i class="bi bi-eye me-1"></i> Detalle del pedido
+        <button class="btn btn-outline-info rounded-pill btn-sm fw-bold" onclick="abrirModalRastreo('${pedido.id}')">
+          <i class="bi bi-geo me-1"></i>Rastrear Envío
         </button>
-
-        <div class="d-flex gap-2">
-          ${pedido.estado !== 'entregado' ? `
-            <button class="btn-pedido-action btn-track-custom" onclick="abrirModalRastreo('${pedido.id}')">
-              <i class="bi bi-pin-map me-1"></i> Rastrear pedido
-            </button>
-          ` : ''}
-          <button class="btn-pedido-action btn-reorder-custom" onclick="recomprarPedido('${pedido.id}')">
-            <i class="bi bi-cart-plus me-1"></i> Volver a comprar
-          </button>
-        </div>
       </div>
     </div>
   `;
 }
 
-function renderizarPedidos() {
-  const usuario = obtenerUsuarioAutenticado();
-  if (!usuario) return;
+async function renderizarPedidos() {
+  const container = document.getElementById("contenedorPedidos");
+  if (!container) return;
 
-  const contenedor = document.getElementById("contenedorPedidos");
-  const sinPedidos = document.getElementById("sinPedidos");
-  if (!contenedor) return;
+  PEDIDOS_CACHE = await obtenerPedidosBackend();
+  renderizarEstadisticas(PEDIDOS_CACHE);
 
-  const pedidos = obtenerPedidos();
-  renderizarEstadisticas(pedidos);
-
-  let filtrados = pedidos;
+  let filtrados = PEDIDOS_CACHE;
   if (estadoFiltroActual !== "todos") {
-    filtrados = pedidos.filter(p => p.estado === estadoFiltroActual);
+    filtrados = PEDIDOS_CACHE.filter(p => p.estado === estadoFiltroActual);
   }
 
   if (filtrados.length === 0) {
-    contenedor.innerHTML = "";
-    if (sinPedidos) sinPedidos.classList.remove("d-none");
-  } else {
-    if (sinPedidos) sinPedidos.classList.add("d-none");
-    contenedor.innerHTML = filtrados.map(p => crearTarjetaPedido(p)).join("");
+    container.innerHTML = `
+      <div class="text-center py-5">
+        <i class="bi bi-box-seam display-1 text-secondary mb-3 d-block"></i>
+        <h5 class="text-color-principal fw-bold">No tienes pedidos en esta categoría</h5>
+        <p class="text-color-alternativo small">Cuando realices compras desde el catálogo aparecerán aquí.</p>
+        <a href="../catalogo/index.html" class="btn btn-outline-info rounded-pill px-4 mt-2">
+          <i class="bi bi-shop me-2"></i>Ir al catálogo
+        </a>
+      </div>
+    `;
+    return;
   }
+
+  container.innerHTML = filtrados.map(p => crearTarjetaPedido(p)).join("");
 }
 
 function initTabsFiltro() {
-  const buttons = document.querySelectorAll("#tabsPedidos button");
-  buttons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      buttons.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      estadoFiltroActual = btn.getAttribute("data-filtro");
+  const tabs = document.querySelectorAll(".pedidos-nav-tab");
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      tabs.forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      estadoFiltroActual = tab.getAttribute("data-estado") || "todos";
       renderizarPedidos();
     });
   });
 }
 
-function recomprarPedido(idPedido) {
-  const pedidos = obtenerPedidos();
-  const pedido = pedidos.find(p => p.id === idPedido);
-  if (!pedido) return;
-
-  let agregados = 0;
-  pedido.items.forEach(item => {
-    for (let i = 0; i < item.cantidad; i++) {
-      if (agregarAlCarrito(item.id)) agregados++;
-    }
-  });
-
-  if (agregados > 0) {
-    mostrarToastCarrito("Productos añadidos al carrito", "success");
-    abrirCarrito();
-  }
-}
-
 function abrirModalRastreo(idPedido) {
-  const pedidos = obtenerPedidos();
-  const pedido = pedidos.find(p => p.id === idPedido);
+  const pedido = PEDIDOS_CACHE.find(p => p.id === idPedido);
   if (!pedido) return;
 
   const modalEl = document.getElementById("modalRastreo");
   if (!modalEl) return;
 
-  document.getElementById("rastreoIdPedido").textContent = pedido.id;
-  document.getElementById("rastreoTransportadora").textContent = pedido.transportadora;
-  document.getElementById("rastreoGuia").textContent = pedido.guia;
-  document.getElementById("rastreoEstadoActual").textContent = pedido.pasoTexto;
+  const rId = document.getElementById("rastreoIdPedido");
+  const rTrans = document.getElementById("rastreoTransportadora");
+  const rGuia = document.getElementById("rastreoGuia");
+  const rEst = document.getElementById("rastreoEstadoActual");
+
+  if (rId) rId.textContent = pedido.id;
+  if (rTrans) rTrans.textContent = pedido.transportadora;
+  if (rGuia) rGuia.textContent = pedido.guia;
+  if (rEst) rEst.textContent = pedido.pasoTexto;
 
   const timelineContainer = document.getElementById("rastreoTimeline");
   const eventos = [
@@ -345,18 +263,20 @@ function abrirModalRastreo(idPedido) {
     { fecha: "Estimado pronto", titulo: "Entrega final en domicilio", desc: `Dirección de entrega: ${pedido.direccion}`, icon: "bi-house-heart-fill", active: pedido.paso >= 4 }
   ];
 
-  timelineContainer.innerHTML = eventos.map(ev => `
-    <div class="timeline-event ${ev.active ? 'active' : ''}">
-      <div class="timeline-icon">
-        <i class="bi ${ev.icon}"></i>
+  if (timelineContainer) {
+    timelineContainer.innerHTML = eventos.map(ev => `
+      <div class="timeline-event ${ev.active ? 'active' : ''}">
+        <div class="timeline-icon">
+          <i class="bi ${ev.icon}"></i>
+        </div>
+        <div class="timeline-content">
+          <span class="timeline-date">${ev.fecha}</span>
+          <h6 class="timeline-title">${ev.titulo}</h6>
+          <p class="timeline-desc">${ev.desc}</p>
+        </div>
       </div>
-      <div class="timeline-content">
-        <span class="timeline-date">${ev.fecha}</span>
-        <h6 class="timeline-title">${ev.titulo}</h6>
-        <p class="timeline-desc">${ev.desc}</p>
-      </div>
-    </div>
-  `).join("");
+    `).join("");
+  }
 
   const modal = new bootstrap.Modal(modalEl);
   modal.show();
@@ -368,7 +288,8 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = "../login/index.html";
     return;
   }
-  document.getElementById("usuarioNombreHeading").textContent = usuario.nombre || usuario.email;
+  const hHeading = document.getElementById("usuarioNombreHeading");
+  if (hHeading) hHeading.textContent = usuario.nombre || usuario.email;
   initTabsFiltro();
   renderizarPedidos();
 });
