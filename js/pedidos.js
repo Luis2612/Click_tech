@@ -5,6 +5,22 @@ function obtenerUsuarioAutenticado() {
   return JSON.parse(sessionStorage.getItem("usuarioAutenticado") || "null");
 }
 
+function formatearFechaPedido(fechaRaw) {
+  if (!fechaRaw) return "Fecha N/A";
+  if (Array.isArray(fechaRaw)) {
+    const y = fechaRaw[0];
+    const m = (fechaRaw[1] || 1) - 1;
+    const d = fechaRaw[2] || 1;
+    const h = fechaRaw[3] || 0;
+    const min = fechaRaw[4] || 0;
+    const dObj = new Date(y, m, d, h, min);
+    return dObj.toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
+  const dObj = new Date(fechaRaw);
+  if (isNaN(dObj.getTime())) return String(fechaRaw);
+  return dObj.toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
 async function obtenerPedidosBackend() {
   const usuario = obtenerUsuarioAutenticado();
   if (!usuario) return [];
@@ -24,21 +40,21 @@ async function obtenerPedidosBackend() {
       return data.data.map(p => ({
         id: `CT-${p.id}`,
         rawId: p.id,
-        fecha: p.fecha ? new Date(p.fecha).toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Fecha N/A",
+        fecha: formatearFechaPedido(p.fecha),
         timestamp: p.fecha ? new Date(p.fecha).getTime() : Date.now(),
         estado: "en-proceso",
         paso: 2,
         pasoTexto: "En preparación por el equipo de almacén",
         transportadora: "Servientrega",
         guia: `CT-TRK-${p.id}`,
-        direccion: p.direccion,
+        direccion: p.direccion || "Dirección registrada",
         metodoPago: p.metodoPago || "Tarjeta de Crédito",
         total: Number(p.total),
-        items: (p.detallePedidoResponseList || []).map(d => {
-          const prod = productosMap[d.productoId] || {};
+        items: (p.detallePedidoResponseList || p.detalles || []).map(d => {
+          const prod = productosMap[d.productoId || d.idProducto] || {};
           return {
-            id: d.productoId,
-            nombre: prod.nombre || `Producto #${d.productoId}`,
+            id: d.productoId || d.idProducto,
+            nombre: prod.nombre || `Producto #${d.productoId || d.idProducto}`,
             categoria: prod.categoria || "Periféricos",
             imagen: prod.imagen || "",
             cantidad: d.cantidad,
@@ -140,11 +156,11 @@ function crearTarjetaPedido(pedido) {
       <div class="pedido-item-row">
         ${imgHTML}
         <div class="pedido-item-info">
-          <span class="pedido-item-cat">${item.categoria || "Periféricos"}</span>
-          <h6 class="pedido-item-name">${item.nombre}</h6>
-          <span class="pedido-item-qty">Cantidad: ${item.cantidad} x $${item.precio.toLocaleString("es-CO")}</span>
+          <span class="pedido-item-cat text-info fw-semibold">${item.categoria || "Periféricos"}</span>
+          <h6 class="pedido-item-name text-white fw-bold m-0">${item.nombre}</h6>
+          <span class="pedido-item-qty text-light opacity-75 small">Cantidad: ${item.cantidad} x $${item.precio.toLocaleString("es-CO")}</span>
         </div>
-        <span class="pedido-item-price">$${item.totalItem.toLocaleString("es-CO")}</span>
+        <span class="pedido-item-price text-info fw-bold fs-6">$${item.totalItem.toLocaleString("es-CO")}</span>
       </div>
     `;
   }).join("");
@@ -154,14 +170,14 @@ function crearTarjetaPedido(pedido) {
       <div class="card-pedido-header">
         <div>
           <div class="d-flex align-items-center gap-2 mb-1">
-            <h5 class="pedido-id mb-0">${pedido.id}</h5>
+            <h5 class="card-pedido-id mb-0 text-white fw-bold">${pedido.id}</h5>
             ${badge}
           </div>
-          <span class="pedido-date"><i class="bi bi-calendar3 me-1"></i>${pedido.fecha}</span>
+          <span class="card-pedido-date text-light opacity-75 small"><i class="bi bi-calendar3 me-1"></i>${pedido.fecha}</span>
         </div>
         <div class="text-end">
-          <span class="pedido-total-label">Total del Pedido</span>
-          <div class="pedido-total-val">$${pedido.total.toLocaleString("es-CO")}</div>
+          <span class="card-pedido-total-label text-light opacity-75 small d-block">Total del Pedido</span>
+          <div class="card-pedido-total-val text-info fw-bold fs-5">$${pedido.total.toLocaleString("es-CO")}</div>
         </div>
       </div>
 
@@ -172,18 +188,18 @@ function crearTarjetaPedido(pedido) {
           ${itemsHTML}
         </div>
 
-        <div class="pedido-details-grid mt-3 pt-3 border-top border-secondary">
-          <div>
-            <span class="detail-label"><i class="bi bi-geo-alt me-1"></i>Dirección de Envío</span>
-            <p class="detail-val">${pedido.direccion}</p>
+        <div class="pedido-details-grid mt-3 pt-3 border-top border-secondary row g-3">
+          <div class="col-md-4">
+            <span class="text-info small fw-bold d-block mb-1"><i class="bi bi-geo-alt me-1"></i>Dirección de Envío</span>
+            <p class="text-white small m-0 fw-semibold">${pedido.direccion}</p>
           </div>
-          <div>
-            <span class="detail-label"><i class="bi bi-credit-card me-1"></i>Método de Pago</span>
-            <p class="detail-val">${pedido.metodoPago}</p>
+          <div class="col-md-4">
+            <span class="text-info small fw-bold d-block mb-1"><i class="bi bi-credit-card me-1"></i>Método de Pago</span>
+            <p class="text-white small m-0 fw-semibold">${pedido.metodoPago}</p>
           </div>
-          <div>
-            <span class="detail-label"><i class="bi bi-truck me-1"></i>Transportadora</span>
-            <p class="detail-val">${pedido.transportadora} (${pedido.guia})</p>
+          <div class="col-md-4">
+            <span class="text-info small fw-bold d-block mb-1"><i class="bi bi-truck me-1"></i>Transportadora</span>
+            <p class="text-white small m-0 fw-semibold">${pedido.transportadora} <span class="badge bg-info text-dark ms-1">${pedido.guia}</span></p>
           </div>
         </div>
       </div>
@@ -227,12 +243,12 @@ async function renderizarPedidos() {
 }
 
 function initTabsFiltro() {
-  const tabs = document.querySelectorAll(".pedidos-nav-tab");
+  const tabs = document.querySelectorAll("#tabsPedidos .tab-btn");
   tabs.forEach(tab => {
     tab.addEventListener("click", () => {
       tabs.forEach(t => t.classList.remove("active"));
       tab.classList.add("active");
-      estadoFiltroActual = tab.getAttribute("data-estado") || "todos";
+      estadoFiltroActual = tab.getAttribute("data-filtro") || "todos";
       renderizarPedidos();
     });
   });
