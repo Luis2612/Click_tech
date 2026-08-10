@@ -751,7 +751,6 @@ function calcularEnvioPasarelaLive() {
   if (rowDescuentoEl) {
     rowDescuentoEl.classList.add("d-none");
   }
-  }
 
   if (envioEl) {
     if (esGratis) {
