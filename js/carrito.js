@@ -1,5 +1,12 @@
 const CARRITO_KEY = "carrito";
 
+function _obtenerProductosDisponiblesSync() {
+  if (window.PRODUCTOS_CACHE && Array.isArray(window.PRODUCTOS_CACHE)) {
+    return window.PRODUCTOS_CACHE;
+  }
+  return [];
+}
+
 async function _obtenerProductosDisponibles() {
   if (window.PRODUCTOS_CACHE && Array.isArray(window.PRODUCTOS_CACHE) && window.PRODUCTOS_CACHE.length > 0) {
     return window.PRODUCTOS_CACHE;
@@ -20,7 +27,7 @@ async function _obtenerProductosDisponibles() {
       return window.PRODUCTOS_CACHE;
     }
   } catch (e) {}
-  return [];
+  return window.PRODUCTOS_CACHE || [];
 }
 
 function obtenerCarrito() {
@@ -59,20 +66,19 @@ async function agregarAlCarrito(productoId) {
   return true;
 }
 
-
 function eliminarDelCarrito(productoId) {
   let carrito = obtenerCarrito();
-  if (!carrito.some(i => i.id === productoId)) return false;
-  carrito = carrito.filter(i => i.id !== productoId);
+  if (!carrito.some(i => Number(i.id) === Number(productoId))) return false;
+  carrito = carrito.filter(i => Number(i.id) !== Number(productoId));
   guardarCarrito(carrito);
   return true;
 }
 
-function actualizarCantidad(productoId, nuevaCantidad) {
+async function actualizarCantidad(productoId, nuevaCantidad) {
   if (nuevaCantidad <= 0) return eliminarDelCarrito(productoId);
 
-  const productos = _obtenerProductosDisponibles();
-  const producto = productos.find(p => p.id === productoId);
+  const productos = await _obtenerProductosDisponibles();
+  const producto = productos.find(p => Number(p.id) === Number(productoId));
   if (!producto) return false;
 
   if (nuevaCantidad > producto.stock) {
@@ -81,7 +87,7 @@ function actualizarCantidad(productoId, nuevaCantidad) {
   }
 
   const carrito = obtenerCarrito();
-  const item = carrito.find(i => i.id === productoId);
+  const item = carrito.find(i => Number(i.id) === Number(productoId));
   if (!item) return false;
 
   item.cantidad = nuevaCantidad;
@@ -89,18 +95,18 @@ function actualizarCantidad(productoId, nuevaCantidad) {
   return true;
 }
 
-function incrementarCantidad(productoId) {
+async function incrementarCantidad(productoId) {
   const carrito = obtenerCarrito();
-  const item = carrito.find(i => i.id === productoId);
-  if (!item) return agregarAlCarrito(productoId);
-  return actualizarCantidad(productoId, item.cantidad + 1);
+  const item = carrito.find(i => Number(i.id) === Number(productoId));
+  if (!item) return await agregarAlCarrito(productoId);
+  return await actualizarCantidad(productoId, item.cantidad + 1);
 }
 
-function decrementarCantidad(productoId) {
+async function decrementarCantidad(productoId) {
   const carrito = obtenerCarrito();
-  const item = carrito.find(i => i.id === productoId);
+  const item = carrito.find(i => Number(i.id) === Number(productoId));
   if (!item) return false;
-  return actualizarCantidad(productoId, item.cantidad - 1);
+  return await actualizarCantidad(productoId, item.cantidad - 1);
 }
 
 function vaciarCarrito() {
@@ -114,11 +120,11 @@ function obtenerTotalItems() {
 
 function obtenerResumenCarrito() {
   const carrito = obtenerCarrito();
-  const productos = _obtenerProductosDisponibles();
+  const productos = _obtenerProductosDisponiblesSync();
 
   const items = carrito
     .map(item => {
-      const producto = productos.find(p => p.id === item.id);
+      const producto = productos.find(p => Number(p.id) === Number(item.id));
       if (!producto) return null;
       return { ...producto, cantidad: item.cantidad, totalItem: producto.precio * item.cantidad };
     })
@@ -133,24 +139,24 @@ function obtenerResumenCarrito() {
 }
 
 function cantidadEnCarrito(productoId) {
-  const item = obtenerCarrito().find(i => i.id === productoId);
+  const item = obtenerCarrito().find(i => Number(i.id) === Number(productoId));
   return item ? item.cantidad : 0;
 }
 
-function validarCarrito() {
+async function validarCarrito() {
   const carrito = obtenerCarrito();
-  const productos = _obtenerProductosDisponibles();
+  const productos = await _obtenerProductosDisponibles();
   let carritoActualizado = [];
   let huboAjustes = false;
 
   carrito.forEach(item => {
-    const producto = productos.find(p => p.id === item.id);
+    const producto = productos.find(p => Number(p.id) === Number(item.id));
     if (!producto || producto.stock === 0) {
       huboAjustes = true;
       return;
     }
     if (item.cantidad > producto.stock) {
-      carritoActualizado.push({ id: item.id, cantidad: producto.stock });
+      carritoActualizado.push({ id: Number(item.id), cantidad: producto.stock });
       huboAjustes = true;
     } else {
       carritoActualizado.push(item);
@@ -159,6 +165,7 @@ function validarCarrito() {
 
   if (huboAjustes) guardarCarrito(carritoActualizado);
 }
+
 
 function actualizarBadgeCarrito() {
   const total = obtenerTotalItems();
@@ -1046,7 +1053,8 @@ function _rutaCatalogo() {
   return "../catalogo/index.html";
 }
 
-function abrirCarrito() {
+async function abrirCarrito() {
+  await _obtenerProductosDisponibles();
   renderizarCarrito();
   const offcanvasEl = document.getElementById("offcanvasCarrito");
   if (!offcanvasEl) return;
@@ -1054,10 +1062,12 @@ function abrirCarrito() {
   offcanvas.show();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   crearOffcanvasCarrito();
   crearToastContainer();
-  validarCarrito();
+  await _obtenerProductosDisponibles();
+  await validarCarrito();
   actualizarBadgeCarrito();
-  listarProductos()
+  if (typeof listarProductos === "function") listarProductos();
 });
+
