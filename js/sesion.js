@@ -1,7 +1,47 @@
 const API_BASE_URL = `${CONFIG.API_URL}/auth`;
 
+function esTokenExpirado(token) {
+  if (!token) return true;
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return true;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+    if (!payload.exp) return false;
+    const ahoraEnSegundos = Math.floor(Date.now() / 1000);
+    return payload.exp < ahoraEnSegundos;
+  } catch (e) {
+    return false;
+  }
+}
+
+function manejarSesionExpirada() {
+  sessionStorage.removeItem("usuarioAutenticado");
+  const enLogin = window.location.pathname.includes("/login/");
+  if (!enLogin) {
+    window.location.href = window.location.pathname.includes("/html/") ? "../login/index.html" : "html/login/index.html";
+  }
+}
+
+const _originalFetch = window.fetch;
+window.fetch = async function(...args) {
+  const response = await _originalFetch(...args);
+  if (response.status === 401 || response.status === 403) {
+    const usuario = sessionStorage.getItem("usuarioAutenticado");
+    if (usuario) {
+      sessionStorage.removeItem("usuarioAutenticado");
+      manejarSesionExpirada();
+    }
+  }
+  return response;
+};
+
 function validarRutasAutorizadas() {
   let usuario = JSON.parse(sessionStorage.getItem("usuarioAutenticado") || "null");
+
+  if (usuario && esTokenExpirado(usuario.token)) {
+    manejarSesionExpirada();
+    return;
+  }
 
   if (usuario) {
     let correoUsuario = document.getElementById("nombreUsuario");
