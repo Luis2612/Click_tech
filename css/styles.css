@@ -2677,3 +2677,44 @@ button.btn-metodo-pago.active {
     }
 }
 
+.pedido-details-grid .detail-label,
+.detail-label {
+    color: #06B6D4 !important;
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    display: block !important;
+    margin-bottom: 4px !important;
+}
+
+.pedido-details-grid .detail-val,
+.detail-val {
+    color: #F8FAFC !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+}
+
+.card-pedido-id,
+.pedido-id {
+    color: #F8FAFC !important;
+    font-weight: 800 !important;
+}
+
+.card-pedido-date,
+.pedido-date {
+    color: #94A3B8 !important;
+}
+
+.card-pedido-total-label,
+.pedido-total-label {
+    color: #94A3B8 !important;
+    font-weight: 600 !important;
+}
+
+.card-pedido-total-val,
+.pedido-total-val {
+    color: #06B6D4 !important;
+    font-weight: 800 !important;
+}
+
+

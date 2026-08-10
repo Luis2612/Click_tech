@@ -190,16 +190,16 @@ function crearTarjetaPedido(pedido) {
 
         <div class="pedido-details-grid mt-3 pt-3 border-top border-secondary row g-3">
           <div class="col-md-4">
-            <span class="text-info small fw-bold d-block mb-1"><i class="bi bi-geo-alt me-1"></i>Dirección de Envío</span>
-            <p class="text-white small m-0 fw-semibold">${pedido.direccion}</p>
+            <span class="detail-label"><i class="bi bi-geo-alt me-1"></i>Dirección de Envío</span>
+            <p class="detail-val">${pedido.direccion}</p>
           </div>
           <div class="col-md-4">
-            <span class="text-info small fw-bold d-block mb-1"><i class="bi bi-credit-card me-1"></i>Método de Pago</span>
-            <p class="text-white small m-0 fw-semibold">${pedido.metodoPago}</p>
+            <span class="detail-label"><i class="bi bi-credit-card me-1"></i>Método de Pago</span>
+            <p class="detail-val">${pedido.metodoPago}</p>
           </div>
           <div class="col-md-4">
-            <span class="text-info small fw-bold d-block mb-1"><i class="bi bi-truck me-1"></i>Transportadora</span>
-            <p class="text-white small m-0 fw-semibold">${pedido.transportadora} <span class="badge bg-info text-dark ms-1">${pedido.guia}</span></p>
+            <span class="detail-label"><i class="bi bi-truck me-1"></i>Transportadora</span>
+            <p class="detail-val">${pedido.transportadora} (${pedido.guia})</p>
           </div>
         </div>
       </div>
