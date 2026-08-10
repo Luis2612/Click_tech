@@ -973,18 +973,23 @@ async function procesarTransaccionPasarela(event) {
     </div>
   `;
 
+  const listaDetalles = resumen.items.map(item => ({
+    idProducto: Number(item.id),
+    cantidad: Number(item.cantidad),
+    precioUnitario: Number(item.precio),
+    subtotal: Number(item.totalItem)
+  }));
+
   const payload = {
-    idUsuario: usuario.idUsuario,
+    idUsuario: Number(usuario.idUsuario),
     direccion: direccionCompleta,
-    total: infoEnvio.totalConEnvio,
+    total: Number(resumen.subtotal),
     metodoPago: nombreMetodo,
-    detalles: resumen.items.map(item => ({
-      idProducto: Number(item.id),
-      cantidad: Number(item.cantidad),
-      precioUnitario: Number(item.precio),
-      subtotal: Number(item.totalItem)
-    }))
+    fecha: new Date().toISOString(),
+    detalles: listaDetalles,
+    detallePedidoRequestList: listaDetalles
   };
+
 
   try {
     const response = await fetch(`${CONFIG.API_URL}/pedidos`, {
