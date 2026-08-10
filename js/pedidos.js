@@ -33,9 +33,14 @@ async function obtenerPedidosBackend() {
     const data = await res.json();
     if (data.success && Array.isArray(data.data)) {
       const productosMap = {};
-      if (typeof _obtenerProductosBackend === "function") {
-        const prods = await _obtenerProductosBackend();
-        prods.forEach(p => { productosMap[p.id] = p; });
+      if (typeof _obtenerProductosDisponibles === "function") {
+        const prods = await _obtenerProductosDisponibles();
+        if (Array.isArray(prods)) {
+          prods.forEach(p => {
+            const pId = Number(p.id || p.idProducto);
+            productosMap[pId] = p;
+          });
+        }
       }
       return data.data.map(p => ({
         id: `CT-${p.id}`,
@@ -51,15 +56,16 @@ async function obtenerPedidosBackend() {
         metodoPago: p.metodoPago || "Tarjeta de Crédito",
         total: Number(p.total),
         items: (p.detallePedidoResponseList || p.detalles || []).map(d => {
-          const prod = productosMap[d.productoId || d.idProducto] || {};
+          const pid = Number(d.productoId || d.idProducto || (d.producto && d.producto.idProducto));
+          const prod = productosMap[pid] || (d.producto || {});
           return {
-            id: d.productoId || d.idProducto,
-            nombre: prod.nombre || `Producto #${d.productoId || d.idProducto}`,
-            categoria: prod.categoria || "Periféricos",
-            imagen: prod.imagen || "",
+            id: pid,
+            nombre: prod.nombre || d.nombreProducto || `Producto #${pid}`,
+            categoria: (prod.categoria ? (typeof prod.categoria === "object" ? prod.categoria.nombre : prod.categoria) : "Periféricos"),
+            imagen: prod.imagen || (d.producto && d.producto.imagen) || "",
             cantidad: d.cantidad,
-            precio: Number(d.precioUnitario),
-            totalItem: Number(d.subtotal)
+            precio: Number(d.precioUnitario || d.precio || 0),
+            totalItem: Number(d.subtotal || 0)
           };
         })
       }));
