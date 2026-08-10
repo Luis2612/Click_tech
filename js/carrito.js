@@ -720,15 +720,7 @@ function crearModalPasarelaPago() {
 
 function calcularEnvioPasarelaLive() {
   const resumen = obtenerResumenCarrito();
-  if (!resumen) return { costoEnvio: 0, descuento: 0, totalConEnvio: 0, ciudad: "Bogotá D.C.", esGratis: true, esPrimera: true };
-
-  const usuario = JSON.parse(sessionStorage.getItem("usuarioAutenticado") || "null");
-  const guestEmail = document.getElementById("inputGuestEmail")?.value || "";
-  const emailEvaluado = usuario ? usuario.email : guestEmail;
-
-  const esPrimera = esPrimeraCompra(emailEvaluado);
-  const descuento = (esPrimera && resumen.subtotal > 0) ? Math.round(resumen.subtotal * 0.10) : 0;
-  const subtotalConDescuento = Math.max(0, resumen.subtotal - descuento);
+  if (!resumen) return { costoEnvio: 0, descuento: 0, totalConEnvio: 0, ciudad: "Bogotá D.C.", esGratis: true, esPrimera: false };
 
   const ciudadSelect = document.getElementById("selectCiudadPasarela");
   const ciudad = ciudadSelect ? ciudadSelect.value : "Bogotá D.C.";
@@ -747,7 +739,7 @@ function calcularEnvioPasarelaLive() {
     }
   }
 
-  const totalFinal = subtotalConDescuento + costoEnvio;
+  const totalFinal = resumen.subtotal + costoEnvio;
 
   const rowDescuentoEl = document.getElementById("rowPasarelaDescuento");
   const descuentoEl = document.getElementById("pasarelaDescuento");
@@ -756,13 +748,9 @@ function calcularEnvioPasarelaLive() {
   const btnPagarEl = document.getElementById("btnPagarPasarela");
   const bannerEl = document.getElementById("pasarelaEnvioBanner");
 
-  if (rowDescuentoEl && descuentoEl) {
-    if (esPrimera && descuento > 0) {
-      rowDescuentoEl.classList.remove("d-none");
-      descuentoEl.textContent = `-$${descuento.toLocaleString("es-CO")}`;
-    } else {
-      rowDescuentoEl.classList.add("d-none");
-    }
+  if (rowDescuentoEl) {
+    rowDescuentoEl.classList.add("d-none");
+  }
   }
 
   if (envioEl) {
@@ -802,7 +790,7 @@ function calcularEnvioPasarelaLive() {
     btnPagarEl.innerHTML = `<i class="bi bi-lock-fill me-2"></i>Pagar $${totalFinal.toLocaleString("es-CO")}`;
   }
 
-  return { costoEnvio, descuento, totalConEnvio: totalFinal, ciudad, esGratis, esPrimera };
+  return { costoEnvio, descuento: 0, totalConEnvio: totalFinal, ciudad, esGratis, esPrimera: false };
 }
 
 function abrirPasarelaPago() {
