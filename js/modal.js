@@ -131,28 +131,8 @@ async function ejecutarEliminar() {
 }
 
 function mostrarToast(mensaje, tipo = "success") {
-  const contenedor = document.getElementById("toastContenedor");
-  if (!contenedor) return;
-  const iconos = {
-    success: "check-circle-fill",
-    danger: "exclamation-triangle-fill",
-    warning: "exclamation-circle-fill",
-    info: "info-circle-fill"
-  };
-
-  const toastHTML = `
-    <div class="toast align-items-center text-bg-${tipo} border-0 mb-2" role="alert">
-      <div class="d-flex">
-        <div class="toast-body">
-          <i class="bi bi-${iconos[tipo] || 'info-circle'} me-2"></i>${mensaje}
-        </div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-      </div>
-    </div>`;
-
-  contenedor.insertAdjacentHTML("beforeend", toastHTML);
-  const toastEl = contenedor.lastElementChild;
-  const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
-  toast.show();
-  toastEl.addEventListener("hidden.bs.toast", () => toastEl.remove());
+  if (typeof mostrarToastCarrito === "function") {
+    mostrarToastCarrito(mensaje, tipo);
+    return;
+  }
 }

@@ -202,41 +202,84 @@ function crearOffcanvasCarrito() {
   document.body.appendChild(offcanvas);
 }
 
-function crearToastContainer() {
-  if (document.getElementById("toastCarritoContainer")) return;
-  const container = document.createElement("div");
-  container.id = "toastCarritoContainer";
-  container.className = "toast-carrito-container";
-  document.body.appendChild(container);
+function crearToastContainer() {}
+
+function _ctPopupTitulos(tipo) {
+  const map = {
+    success: "Operacion exitosa",
+    warning: "Atencion",
+    danger: "Error",
+    info: "Informacion"
+  };
+  return map[tipo] || "Aviso";
 }
 
-function mostrarToastCarrito(mensaje, tipo) {
-  const container = document.getElementById("toastCarritoContainer");
-  if (!container) return;
-
-  const iconos = {
-    success: "check-circle-fill",
-    danger: "exclamation-triangle-fill",
-    warning: "exclamation-circle-fill",
-    info: "info-circle-fill"
+function _ctPopupIconos(tipo) {
+  const map = {
+    success: "bi-check-circle-fill",
+    warning: "bi-exclamation-triangle-fill",
+    danger: "bi-x-circle-fill",
+    info: "bi-info-circle-fill"
   };
+  return map[tipo] || "bi-info-circle-fill";
+}
 
-  const toastHTML = `
-    <div class="toast align-items-center text-bg-${tipo} border-0 mb-2" role="alert">
-      <div class="d-flex">
-        <div class="toast-body">
-          <i class="bi bi-${iconos[tipo] || "info-circle"} me-2"></i>${mensaje}
-        </div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-      </div>
+function mostrarToastCarrito(mensaje, tipo, duracion) {
+  const dur = duracion || 3000;
+
+  const existente = document.querySelector(".ct-popup-overlay");
+  if (existente) existente.remove();
+  const existente2 = document.querySelector(".ct-popup-container");
+  if (existente2) existente2.remove();
+
+  const overlay = document.createElement("div");
+  overlay.className = "ct-popup-overlay";
+
+  const popup = document.createElement("div");
+  popup.className = "ct-popup-container";
+  popup.innerHTML = `
+    <button class="ct-popup-close" aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
+    <div class="ct-popup-icon-wrap ct-popup-icon-${tipo}">
+      <i class="bi ${_ctPopupIconos(tipo)}"></i>
     </div>
+    <div class="ct-popup-title">${_ctPopupTitulos(tipo)}</div>
+    <p class="ct-popup-message">${mensaje}</p>
+    <button class="ct-popup-btn ct-popup-btn-${tipo}">Aceptar</button>
+    <div class="ct-popup-progress ct-popup-progress-${tipo}" style="width: 100%;"></div>
   `;
 
-  container.insertAdjacentHTML("beforeend", toastHTML);
-  const toastEl = container.lastElementChild;
-  const toast = new bootstrap.Toast(toastEl, { delay: 2500 });
-  toast.show();
-  toastEl.addEventListener("hidden.bs.toast", () => toastEl.remove());
+  document.body.appendChild(overlay);
+  document.body.appendChild(popup);
+
+  requestAnimationFrame(() => {
+    overlay.classList.add("ct-popup-visible");
+    popup.classList.add("ct-popup-visible");
+  });
+
+  const progressBar = popup.querySelector(".ct-popup-progress");
+  if (progressBar) {
+    progressBar.style.transitionDuration = dur + "ms";
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        progressBar.style.width = "0%";
+      });
+    });
+  }
+
+  function cerrarPopup() {
+    overlay.classList.remove("ct-popup-visible");
+    popup.classList.remove("ct-popup-visible");
+    setTimeout(() => {
+      overlay.remove();
+      popup.remove();
+    }, 400);
+  }
+
+  popup.querySelector(".ct-popup-close").addEventListener("click", cerrarPopup);
+  popup.querySelector(".ct-popup-btn").addEventListener("click", cerrarPopup);
+  overlay.addEventListener("click", cerrarPopup);
+
+  setTimeout(cerrarPopup, dur);
 }
 
 function renderizarCarrito() {
